@@ -1,0 +1,52 @@
+package com.utp.RestoControl.Entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "alimentos")
+
+@Getter
+@Setter
+
+@NoArgsConstructor
+@AllArgsConstructor
+
+@Builder
+public class Alimento {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "id_alimento")
+    private Integer idAlimento;
+
+    @Column(name = "nombre_alimento",
+            nullable = false,
+            length = 100)
+    private String nombreAlimento;
+
+    @Column(length = 200)
+    private String descripcion;
+
+    @Column(nullable = false,
+            precision = 10,
+            scale = 2)
+    private BigDecimal precio;
+
+    @Column(nullable = false)
+    private Boolean disponible = true;
+
+    /*
+        RELACIÓN:
+        Muchos alimentos pertenecen a una categoría
+     */
+
+    @ManyToOne
+    @JoinColumn(name = "id_categoria",
+                nullable = false)
+
+    private CategoriaAlimento categoria;
+}
