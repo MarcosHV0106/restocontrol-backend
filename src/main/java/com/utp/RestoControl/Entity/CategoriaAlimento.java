@@ -33,4 +33,6 @@ public class CategoriaAlimento {
     @Column(nullable = false)
     private Boolean eliminado = false;
     
+    //Prueba para que funcione el add
+    
 }
