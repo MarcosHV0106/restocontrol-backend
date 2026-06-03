@@ -1,8 +1,8 @@
 
-package com.utp.RestoControl.Controller.api;
+package com.utp.RestoControl.Controller;
 
-import com.utp.RestoControl.Entity.Usuario;
-import com.utp.RestoControl.Service.UsuarioService;
+import com.utp.RestoControl.Entity.EstadoPedido;
+import com.utp.RestoControl.Service.EstadoPedidoService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/usuarios")
+@RequestMapping("api/estadospedidos")
 
 @RequiredArgsConstructor
-public class UsuarioController {
-    private final UsuarioService service;
+public class EstadoPedidoController {
+    private final EstadoPedidoService service;
     
     @GetMapping
-    public List<Usuario> listar(){
+    public List<EstadoPedido> listar(){
         return service.listar();
     }
     
     @PostMapping
-    public Usuario guardar(@RequestBody Usuario usuarioPedido){
-        return service.guardar(usuarioPedido);
+    public EstadoPedido guardar(@RequestBody EstadoPedido estadoPedido){
+        return service.guardar(estadoPedido);
     }
 }

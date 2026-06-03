@@ -1,5 +1,5 @@
 
-package com.utp.RestoControl.Controller.api;
+package com.utp.RestoControl.Controller;
 
 import com.utp.RestoControl.Entity.EstadoPedido;
 import com.utp.RestoControl.Entity.MovimientoInventario;
