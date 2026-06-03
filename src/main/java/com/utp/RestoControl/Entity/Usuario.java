@@ -45,6 +45,9 @@ public class Usuario {
                 nullable = false)
 
     private Rol rol;
+
+    @Column(nullable = false)
+    private Boolean eliminado = false;
     
     
 }

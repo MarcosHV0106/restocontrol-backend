@@ -5,9 +5,16 @@
 package com.utp.RestoControl.Repository;
 
 import com.utp.RestoControl.Entity.Alimento;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AlimentoRepository
         extends JpaRepository<Alimento, Integer> {
 
+    List<Alimento> findByEliminadoFalse();
+
+    List<Alimento> findByCategoria_IdCategoriaAndEliminadoFalse(Integer idCategoria);
+
+    Optional<Alimento> findByIdAlimentoAndEliminadoFalse(Integer idAlimento);
 }

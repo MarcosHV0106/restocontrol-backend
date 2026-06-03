@@ -39,6 +39,9 @@ public class Alimento {
     @Column(nullable = false)
     private Boolean disponible = true;
 
+    @Column(nullable = false)
+    private Boolean eliminado = false;
+
     /*
         RELACIÓN:
         Muchos alimentos pertenecen a una categoría
