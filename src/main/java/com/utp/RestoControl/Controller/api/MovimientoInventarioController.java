@@ -1,5 +1,5 @@
 
-package com.utp.RestoControl.Controller;
+package com.utp.RestoControl.Controller.api;
 
 import com.utp.RestoControl.Entity.EstadoPedido;
 import com.utp.RestoControl.Entity.MovimientoInventario;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/movimientosinventarios")
+@RequestMapping("api/movimientosinventarios")
 
 @RequiredArgsConstructor
 public class MovimientoInventarioController {

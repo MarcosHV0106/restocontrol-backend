@@ -1,5 +1,5 @@
 
-package com.utp.RestoControl.Controller;
+package com.utp.RestoControl.Controller.api;
 
 import com.utp.RestoControl.Entity.EstadoPedido;
 import com.utp.RestoControl.Service.EstadoPedidoService;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/estadospedidos")
+@RequestMapping("api/estadospedidos")
 
 @RequiredArgsConstructor
 public class EstadoPedidoController {

@@ -1,5 +1,5 @@
 
-package com.utp.RestoControl.Controller;
+package com.utp.RestoControl.Controller.api;
 
 import com.utp.RestoControl.Entity.Usuario;
 import com.utp.RestoControl.Service.UsuarioService;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("api/usuarios")
 
 @RequiredArgsConstructor
 public class UsuarioController {

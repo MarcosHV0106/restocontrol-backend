@@ -1,4 +1,4 @@
-package com.utp.RestoControl.Controller;
+package com.utp.RestoControl.Controller.api;
 
 import com.utp.RestoControl.Entity.ModalidadPedido;
 import com.utp.RestoControl.Service.ModalidadPedidoService;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/modalidadespedidos")
+@RequestMapping("api/modalidadespedidos")
 
 @RequiredArgsConstructor
 public class ModalidadPedidoController {

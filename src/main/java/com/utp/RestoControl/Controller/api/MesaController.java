@@ -1,8 +1,9 @@
 
-package com.utp.RestoControl.Controller;
+package com.utp.RestoControl.Controller.api;
 
-import com.utp.RestoControl.Entity.Insumo;
-import com.utp.RestoControl.Service.InsumoService;
+import com.utp.RestoControl.Entity.EstadoPedido;
+import com.utp.RestoControl.Entity.Mesa;
+import com.utp.RestoControl.Service.MesaService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,19 +13,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/insumos")
+@RequestMapping("api/mesas")
 
 @RequiredArgsConstructor
-public class InsumoController {
-    private final InsumoService service;
+public class MesaController {
+    private final MesaService service;
     
     @GetMapping
-    public List<Insumo> listar(){
+    public List<Mesa> listar(){
         return service.listar();
     }
     
     @PostMapping
-    public Insumo guardar(@RequestBody Insumo insumo){
-        return service.guardar(insumo);
+    public Mesa guardar(@RequestBody Mesa mesa){
+        return service.guardar(mesa);
     }
 }

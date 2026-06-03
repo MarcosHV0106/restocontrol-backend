@@ -1,4 +1,4 @@
-package com.utp.RestoControl.Controller;
+package com.utp.RestoControl.Controller.api;
 import com.utp.RestoControl.Entity.Alimento;
 import com.utp.RestoControl.Service.AlimentoService;
 
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/alimentos")
+@RequestMapping("api/alimentos")
 
 @RequiredArgsConstructor
 public class AlimentoController {
