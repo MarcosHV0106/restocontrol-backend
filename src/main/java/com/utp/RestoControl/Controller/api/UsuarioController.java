@@ -1,8 +1,9 @@
 
-package com.utp.RestoControl.Controller;
+package com.utp.RestoControl.Controller.api;
 
-import com.utp.RestoControl.Entity.Mesa;
-import com.utp.RestoControl.Service.MesaService;
+import com.utp.RestoControl.Dto.UsuarioRequest;
+import com.utp.RestoControl.Dto.UsuarioResponse;
+import com.utp.RestoControl.Service.UsuarioService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,32 +18,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/mesas")
+@RequestMapping("api/usuarios")
 
 @RequiredArgsConstructor
-public class MesaController {
-    private final MesaService service;
+public class UsuarioController {
+    private final UsuarioService service;
     
     @GetMapping
-    public List<Mesa> listar(){
-        return service.listar();
+    public List<UsuarioResponse> listar(){
+        return service.listar()
+                .stream()
+                .map(UsuarioResponse::from)
+                .toList();
     }
 
     @GetMapping("{id}")
-    public Mesa buscarPorId(@PathVariable Integer id) {
-        return service.buscarPorId(id);
+    public UsuarioResponse buscarPorId(@PathVariable Integer id) {
+        return UsuarioResponse.from(service.buscarPorId(id));
     }
     
     @PostMapping
-    public ResponseEntity<Mesa> guardar(@RequestBody Mesa mesa){
+    public ResponseEntity<UsuarioResponse> guardar(@RequestBody UsuarioRequest usuarioPedido){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(service.guardar(mesa));
+                .body(UsuarioResponse.from(service.guardar(usuarioPedido)));
     }
 
     @PutMapping("{id}")
-    public Mesa actualizar(@PathVariable Integer id, @RequestBody Mesa mesa) {
-        return service.actualizar(id, mesa);
+    public UsuarioResponse actualizar(
+            @PathVariable Integer id,
+            @RequestBody UsuarioRequest usuarioPedido) {
+        return UsuarioResponse.from(service.actualizar(id, usuarioPedido));
     }
 
     @DeleteMapping("{id}")

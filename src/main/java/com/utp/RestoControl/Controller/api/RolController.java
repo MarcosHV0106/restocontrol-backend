@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.utp.RestoControl.Controller;
+package com.utp.RestoControl.Controller.api;
 
 import com.utp.RestoControl.Entity.Rol;
 import com.utp.RestoControl.Service.RolService;

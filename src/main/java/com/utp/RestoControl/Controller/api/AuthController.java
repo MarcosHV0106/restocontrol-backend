@@ -1,4 +1,4 @@
-package com.utp.RestoControl.Controller;
+package com.utp.RestoControl.Controller.api;
 
 import com.utp.RestoControl.Dto.LoginRequest;
 import com.utp.RestoControl.Dto.LoginResponse;

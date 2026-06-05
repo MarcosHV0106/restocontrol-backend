@@ -1,0 +1,157 @@
+/* =========================================
+   VARIABLES GLOBALES Y ESTRUCTURA BASE
+   ========================================= */
+:root {
+    --brand-color: #d36b46;
+    --brand-bg-light: #fdfbf8;
+    --table-header-bg: #fdf9f4;
+}
+
+body {
+    background-color: var(--brand-bg-light);
+    margin: 0;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--brand-bg-light);
+}
+
+/* =========================================
+   ESTILOS DEL SIDEBAR (Heredado e Intacto)
+   ========================================= */
+.sidebar {
+    width: 280px;
+    position: sticky;
+    top: 0;
+}
+
+.logo-icon {
+    width: 45px;
+    height: 45px;
+    background-color: #d96c4a;
+}
+
+.custom-link {
+    color: #4a4a4a;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.custom-link:hover {
+    background-color: #f8f9fa;
+    color: #1a1a1a;
+    transform: translateX(3px);
+}
+
+.custom-link.active {
+    background-color: #d96c4a !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(217,108,74,.3);
+}
+
+.version-box {
+    background-color: #fdf5f3;
+    border: 1px solid #fae5df;
+}
+
+.sidebar-nav-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-nav-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-nav-container::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 10px;
+}
+
+.sidebar-nav-container::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;
+}
+
+/* =========================================
+   COMPONENTES COMPARTIDOS (Botones, Tablas, Badges)
+   ========================================= */
+.btn-brand {
+    background-color: var(--brand-color);
+    color: white;
+}
+
+.btn-brand:hover {
+    background-color: #bf5d39;
+    color: white;
+}
+
+.badge-soft-orange {
+    background-color: #fcece8;
+    color: #d36b46;
+}
+
+.badge-soft-green {
+    background-color: #e6f6ec;
+    color: #2ea05b;
+}
+
+/* Nueva insignia azul para la columna Categoría en Alimentos */
+.badge-soft-blue {
+    background-color: #eaf2fd;
+    color: #3b82f6;
+}
+
+/* Contenedor del ícono mini de comida en la tabla */
+.food-icon-box {
+    width: 36px;
+    height: 36px;
+    background-color: #eae6f0;
+    color: #7c3aed;
+    border-radius: 8px;
+}
+
+.tabs-container {
+    background-color: #fdf9f4;
+    border: 1px solid #f0e6da;
+    border-radius: 50px;
+    display: inline-flex;
+    padding: 4px;
+}
+
+.tabs-container .btn {
+    border-radius: 50px;
+    color: #6c757d;
+    font-weight: 500;
+    background: transparent;
+}
+
+.tabs-container .btn.active {
+    background-color: var(--brand-color) !important;
+    color: white !important;
+}
+
+.custom-table-card {
+    border: 1px solid #f0e6da;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+}
+
+.table th {
+    background-color: var(--table-header-bg);
+    color: #495057;
+    font-weight: 600;
+    border-bottom: 1px solid #f0e6da;
+}
+
+.table td {
+    vertical-align: middle;
+}

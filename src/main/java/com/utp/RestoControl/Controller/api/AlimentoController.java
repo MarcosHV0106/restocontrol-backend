@@ -1,4 +1,4 @@
-package com.utp.RestoControl.Controller;
+package com.utp.RestoControl.Controller.api;
 import com.utp.RestoControl.Dto.AlimentoRequest;
 import com.utp.RestoControl.Dto.AlimentoResponse;
 import com.utp.RestoControl.Service.AlimentoService;
