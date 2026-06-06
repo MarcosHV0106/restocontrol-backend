@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
     <head th:replace="~{fragments/sidebar :: head('Gestión de Mesas')}">
-        
+
     </head>
 
     <body>
@@ -15,6 +15,9 @@
                 <div class="main-content">
                     <main class="p-4 p-md-5">
                         <h2>Gestion de Mesas</h2>
+                        <p class="text-end">
+                            <button class="btn btn-primary" @click="nuevo">Nuevo</button>
+                        </p>
                         <div class="row mb-4">
 
                             <!-- Mesas libres -->
@@ -28,7 +31,7 @@
 
                                             <div>
                                                 <h6 class="mb-1">Mesas libres</h6>
-                                                <h2 class="mb-0">5</h2>
+                                                <h2 class="mb-0">{{resumen.libres}}</h2>
                                                 <small>Capacidad total 20</small>
                                             </div>
 
@@ -48,7 +51,7 @@
 
                                             <div>
                                                 <h6 class="mb-1">Mesas ocupadas</h6>
-                                                <h2 class="mb-0">3</h2>
+                                                <h2 class="mb-0">{{resumen.ocupadas}}</h2>
                                                 <small>12 comensales sentados</small>
                                             </div>
 
@@ -68,7 +71,7 @@
 
                                             <div>
                                                 <h6 class="mb-1">Próximas Reservas</h6>
-                                                <h2 class="mb-0">2</h2>
+                                                <h2 class="mb-0">{{resumen.reservadas}}</h2>
                                                 <small>Próxima: 2:00 PM</small>
                                             </div>
 
@@ -87,7 +90,7 @@
 
                                             <div>
                                                 <h6 class="mb-1">Mesas por cobrar</h6>
-                                                <h2 class="mb-0">2</h2>
+                                                <h2 class="mb-0">{{resumen.cobradas}}</h2>
                                                 <small>Mayor espera: 4 min</small>
                                             </div>
 
@@ -99,16 +102,117 @@
 
                         </div>
 
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body py-3">
+
+                                <div class="d-flex flex-wrap gap-4">
+
+                                    <div class="d-flex align-items-center">
+                                        <span class="estado-dot disponible"></span>
+                                        <span>Disponible</span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center">
+                                        <span class="estado-dot ocupada"></span>
+                                        <span>Ocupada</span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center">
+                                        <span class="estado-dot cobrar"></span>
+                                        <span>Por Cobrar</span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center">
+                                        <span class="estado-dot reservada"></span>
+                                        <span>Reservada</span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- FILTROS -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+
+                                <div class="row g-3 align-items-center">
+
+                                    <!-- Buscador -->
+                                    <div class="col-md-4">
+
+                                        <div class="input-group">
+
+                                            <input type="text"
+                                                   class="form-control"
+                                                   placeholder="Buscar mesa..."
+                                                   v-model="busqueda">
+
+                                            <span class="input-group-text">
+                                                <i class="bi bi-search"></i>
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Estado -->
+                                    <div class="col-md-3">
+
+                                        <select class="form-select"
+                                                v-model="estadoFiltro">
+
+                                            <option value="">Todos los estados</option>
+                                            <option value="libre">Libre</option>
+                                            <option value="ocupada">Ocupada</option>
+                                            <option value="reservada">Reservada</option>
+                                            <option value="cobrar">Por cobrar</option>
+
+                                        </select>
+
+                                    </div>
+
+                                    <!-- Botón Limpiar -->
+                                    <div class="col-md-2">
+
+                                        <button class="btn btn-outline-secondary w-100"
+                                                @click="limpiarFiltros">
+
+                                            Limpiar filtros
+
+                                        </button>
+
+                                    </div>
+
+                                    <!-- Botón Actualizar -->
+                                    <div class="col-md-2">
+
+                                        <button class="btn btn-primary w-100"
+                                                @click="listar">
+
+                                            Actualizar
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- TARJETAS -->
                         <div class="row">
 
                             <div class="col-md-3 mb-3"
-                                 v-for="item in entidades">
+                                 v-for="item in mesasFiltradas">
 
                                 <div class="card shadow-sm"
                                      :class="{
                                      'mesa-libre': item.estadoMesa == 'libre',
                                      'mesa-ocupada': item.estadoMesa == 'ocupada',
-                                     'mesa-reservada': item.estadoMesa == 'reservada'
+                                     'mesa-reservada': item.estadoMesa == 'reservada',
+                                     'mesa-cobrar': item.estadoMesa == 'cobrar'
                                      }">
 
                                     <div class="card-body">
@@ -165,8 +269,8 @@
                                     <td>{{item.capacidad}}</td>
                                     <td>{{item.estadoMesa}}</td>
                                     <td class="text-end">
-                                        <button class="btn btn-primary" @click="editar(item.id)">Editar</button>
-                                        <button class="btn btn-danger" @click="eliminar(item.id)">Eliminar</button>
+                                        <button class="btn btn-primary" @click="editar(item.idMesa)">Editar</button>
+                                        <button class="btn btn-danger" @click="eliminar(item.idMesa)">Eliminar</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -208,8 +312,8 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" v-if="entidad.id==0" @click="guardar">Guardar</button>
-                                        <button type="button" class="btn btn-primary" v-if="entidad.id!=0" @click="actualizar">Actualizar</button>
+                                        <button type="button" class="btn btn-primary" v-if="entidad.idMesa==0" @click="guardar">Guardar</button>
+                                        <button type="button" class="btn btn-primary" v-if="entidad.idMesa!=0" @click="actualizar">Actualizar</button>
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                     </div>
                                 </div>
@@ -249,6 +353,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.5.3/vue-resource.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script th:src="@{/js/mesas.js}"></script>
 
 </body>
