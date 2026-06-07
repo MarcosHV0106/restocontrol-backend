@@ -1,360 +1,247 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-    <head th:replace="~{fragments/sidebar :: head('Gestión de Mesas')}">
+<head th:replace="~{fragments/sidebar :: head('Gestión de Mesas')}"></head>
 
-    </head>
+<body>
 
-    <body>
+<div id="app">
+    <div class="layout">
 
-        <div id="app">
-            <div class="layout">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
-                <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        <div class="main-content">
+            <main class="p-4 p-md-5">
+                <h2>Gestion de Mesas</h2>
+                <p class="text-end">
+                    <button class="btn btn-primary" @click="nuevo">Nuevo</button>
+                </p>
 
-                <div class="main-content">
-                    <main class="p-4 p-md-5">
-                        <h2>Gestion de Mesas</h2>
-                        <p class="text-end">
-                            <button class="btn btn-primary" @click="nuevo">Nuevo</button>
-                        </p>
-                        <div class="row mb-4">
-
-                            <!-- Mesas libres -->
-                            <div class="col-md-3">
-                                <div class="card shadow-sm resumen-libre">
-                                    <div class="card-body">
-
-                                        <div class="d-flex align-items-center">
-
-                                            <i class="bi bi-table fs-1 text-success me-3"></i>
-
-                                            <div>
-                                                <h6 class="mb-1">Mesas libres</h6>
-                                                <h2 class="mb-0">{{resumen.libres}}</h2>
-                                                <small>Capacidad total 20</small>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <div class="card shadow-sm resumen-ocupada">
-                                    <div class="card-body">
-
-                                        <div class="d-flex align-items-center">
-
-                                            <i class="bi bi-people fs-1 text-danger me-3"></i>
-
-                                            <div>
-                                                <h6 class="mb-1">Mesas ocupadas</h6>
-                                                <h2 class="mb-0">{{resumen.ocupadas}}</h2>
-                                                <small>12 comensales sentados</small>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <div class="card shadow-sm resumen-reserva">
-                                    <div class="card-body">
-
-                                        <div class="d-flex align-items-center">
-
-                                            <i class="bi bi-calendar-check fs-1 text-primary me-3"></i>
-
-                                            <div>
-                                                <h6 class="mb-1">Próximas Reservas</h6>
-                                                <h2 class="mb-0">{{resumen.reservadas}}</h2>
-                                                <small>Próxima: 2:00 PM</small>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card shadow-sm resumen-cobro">
-                                    <div class="card-body">
-
-                                        <div class="d-flex align-items-center">
-
-                                            <i class="bi bi-cash-coin fs-1 text-warning me-3"></i>
-
-                                            <div>
-                                                <h6 class="mb-1">Mesas por cobrar</h6>
-                                                <h2 class="mb-0">{{resumen.cobradas}}</h2>
-                                                <small>Mayor espera: 4 min</small>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-body py-3">
-
-                                <div class="d-flex flex-wrap gap-4">
-
-                                    <div class="d-flex align-items-center">
-                                        <span class="estado-dot disponible"></span>
-                                        <span>Disponible</span>
-                                    </div>
-
-                                    <div class="d-flex align-items-center">
-                                        <span class="estado-dot ocupada"></span>
-                                        <span>Ocupada</span>
-                                    </div>
-
-                                    <div class="d-flex align-items-center">
-                                        <span class="estado-dot cobrar"></span>
-                                        <span>Por Cobrar</span>
-                                    </div>
-
-                                    <div class="d-flex align-items-center">
-                                        <span class="estado-dot reservada"></span>
-                                        <span>Reservada</span>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- FILTROS -->
-                        <div class="card shadow-sm mb-4">
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm resumen-libre">
                             <div class="card-body">
-
-                                <div class="row g-3 align-items-center">
-
-                                    <!-- Buscador -->
-                                    <div class="col-md-4">
-
-                                        <div class="input-group">
-
-                                            <input type="text"
-                                                   class="form-control"
-                                                   placeholder="Buscar mesa..."
-                                                   v-model="busqueda">
-
-                                            <span class="input-group-text">
-                                                <i class="bi bi-search"></i>
-                                            </span>
-
-                                        </div>
-
-                                    </div>
-
-                                    <!-- Estado -->
-                                    <div class="col-md-3">
-
-                                        <select class="form-select"
-                                                v-model="estadoFiltro">
-
-                                            <option value="">Todos los estados</option>
-                                            <option value="libre">Libre</option>
-                                            <option value="ocupada">Ocupada</option>
-                                            <option value="reservada">Reservada</option>
-                                            <option value="cobrar">Por cobrar</option>
-
-                                        </select>
-
-                                    </div>
-
-                                    <!-- Botón Limpiar -->
-                                    <div class="col-md-2">
-
-                                        <button class="btn btn-outline-secondary w-100"
-                                                @click="limpiarFiltros">
-
-                                            Limpiar filtros
-
-                                        </button>
-
-                                    </div>
-
-                                    <!-- Botón Actualizar -->
-                                    <div class="col-md-2">
-
-                                        <button class="btn btn-primary w-100"
-                                                @click="listar">
-
-                                            Actualizar
-
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- TARJETAS -->
-                        <div class="row">
-
-                            <div class="col-md-3 mb-3"
-                                 v-for="item in mesasFiltradas">
-
-                                <div class="card shadow-sm"
-                                     :class="{
-                                     'mesa-libre': item.estadoMesa == 'libre',
-                                     'mesa-ocupada': item.estadoMesa == 'ocupada',
-                                     'mesa-reservada': item.estadoMesa == 'reservada',
-                                     'mesa-cobrar': item.estadoMesa == 'cobrar'
-                                     }">
-
-                                    <div class="card-body">
-
-                                        <h5>
-                                            Mesa {{item.numeroMesa}}
-                                        </h5>
-
-                                        <p>
-                                            Capacidad: {{item.capacidad}}
-                                        </p>
-
-                                        <span class="badge bg-success"
-                                              v-if="item.estadoMesa=='Libre'">
-
-                                            Libre
-
-                                        </span>
-
-                                        <span class="badge bg-danger"
-                                              v-if="item.estadoMesa=='Ocupada'">
-
-                                            Ocupada
-
-                                        </span>
-
-                                        <span class="badge bg-primary"
-                                              v-if="item.estadoMesa=='Reservada'">
-
-                                            Reservada
-
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Numero de Mesa</th>
-                                    <th>Capacidad</th>
-                                    <th>Estado</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="item in entidades">
-                                    <td>{{item.numeroMesa}}</td>
-                                    <td>{{item.capacidad}}</td>
-                                    <td>{{item.estadoMesa}}</td>
-                                    <td class="text-end">
-                                        <button class="btn btn-primary" @click="editar(item.idMesa)">Editar</button>
-                                        <button class="btn btn-danger" @click="eliminar(item.idMesa)">Eliminar</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="modal" tabindex="-1" id="mdlEntidad">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Editar</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="form-group row">
-                                            <label for="numeroMesa" class="col-sm-2 col-form-label">Numero de Mesa</label>
-                                            <div class="col-sm-10">
-                                                <input class="form-control" id="numeroMesa" v-model="entidad.numeroMesa" />
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label for="capacidad" class="col-sm-2 col-form-label">Capacidad</label>
-                                            <div class="col-sm-10">
-                                                <input class="form-control" id="capacidad" v-model="entidad.capacidad" />
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label for="estadoMesa" class="col-sm-2 col-form-label">Estado</label>
-                                            <div class="col-sm-10">
-                                                <input class="form-control" id="estadoMesa" v-model="entidad.estadoMesa" />
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label for="eliminado" class="col-sm-2 col-form-label">Activo</label>
-                                            <div class="col-sm-10">
-                                                <select class="form-control" v-model="entidad.eliminado" id="eliminado">
-                                                    <option value="true">Si</option>
-                                                    <option value="false">No</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" v-if="entidad.idMesa==0" @click="guardar">Guardar</button>
-                                        <button type="button" class="btn btn-primary" v-if="entidad.idMesa!=0" @click="actualizar">Actualizar</button>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-table fs-1 text-success me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Mesas libres</h6>
+                                        <h2 class="mb-0">{{resumen.libres}}</h2>
+                                        <small>Capacidad total 20</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="modal" tabindex="-1" id="mdlEliminar">
-                            <div class="modal-dialog modal-sm">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Modal title</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Estas seguro que quieres eliminar?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-danger" @click="confimareliminacion">Eliminar</button>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card shadow-sm resumen-ocupada">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-people fs-1 text-danger me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Mesas ocupadas</h6>
+                                        <h2 class="mb-0">{{resumen.ocupadas}}</h2>
+                                        <small>12 comensales sentados</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card shadow-sm resumen-reserva">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-check fs-1 text-primary me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Próximas Reservas</h6>
+                                        <h2 class="mb-0">{{resumen.reservadas}}</h2>
+                                        <small>Próxima: 2:00 PM</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card shadow-sm resumen-cobro">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-cash-coin fs-1 text-warning me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1">Mesas por cobrar</h6>
+                                        <h2 class="mb-0">{{resumen.cobradas}}</h2>
+                                        <small>Mayor espera: 4 min</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </main>
 
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body py-3">
+                        <div class="d-flex flex-wrap gap-4">
+                            <div class="d-flex align-items-center">
+                                <span class="estado-dot disponible"></span>
+                                <span>Disponible</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="estado-dot ocupada"></span>
+                                <span>Ocupada</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="estado-dot cobrar"></span>
+                                <span>Por Cobrar</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="estado-dot reservada"></span>
+                                <span>Reservada</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Buscar mesa..." v-model="busqueda">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" v-model="estadoFiltro">
+                                    <option value="">Todos los estados</option>
+                                    <option value="libre">Libre</option>
+                                    <option value="ocupada">Ocupada</option>
+                                    <option value="reservada">Reservada</option>
+                                    <option value="cobrar">Por cobrar</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-secondary w-100" @click="limpiarFiltros">Limpiar filtros</button>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100" @click="listar">Actualizar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="row">
+                    <div class="col-md-3 mb-3" v-for="item in mesasFiltradas" :key="item.idMesa">
+                        <div class="card shadow-sm" :class="{
+                                 'mesa-libre': item.estadoMesa.toLowerCase() == 'libre',
+                                 'mesa-ocupada': item.estadoMesa.toLowerCase() == 'ocupada',
+                                 'mesa-reservada': item.estadoMesa.toLowerCase() == 'reservada',
+                                 'mesa-cobrar': item.estadoMesa.toLowerCase() == 'cobrar'
+                                 }">
+                            <div class="card-body">
+                                <h5>Mesa {{item.numeroMesa}}</h5>
+                                <p>Capacidad: {{item.capacidad}}</p>
 
+                                <span class="badge bg-success" v-if="item.estadoMesa.toLowerCase() == 'libre'">Libre</span>
+                                <span class="badge bg-danger" v-if="item.estadoMesa.toLowerCase() == 'ocupada'">Ocupada</span>
+                                <span class="badge bg-primary" v-if="item.estadoMesa.toLowerCase() == 'reservada'">Reservada</span>
+                                <span class="badge bg-warning text-dark" v-if="item.estadoMesa.toLowerCase() == 'cobrar'">Por Cobrar</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Numero de Mesa</th>
+                        <th>Capacidad</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="item in entidades" :key="item.idMesa">
+                        <td>{{item.numeroMesa}}</td>
+                        <td>{{item.capacidad}}</td>
+                        <td>{{item.estadoMesa}}</td>
+                        <td class="text-end">
+                            <button class="btn btn-primary" @click="editar(item.idMesa)">Editar</button>
+                            <button class="btn btn-danger" @click="eliminar(item.idMesa)">Eliminar</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
 
+                <div class="modal" tabindex="-1" id="mdlEntidad">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Editar</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group row mb-3">
+                                    <label for="numeroMesa" class="col-sm-3 col-form-label">Numero de Mesa</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="numeroMesa" v-model="entidad.numeroMesa" />
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-3">
+                                    <label for="capacidad" class="col-sm-3 col-form-label">Capacidad</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="capacidad" v-model="entidad.capacidad" />
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-3">
+                                    <label for="estadoMesa" class="col-sm-3 col-form-label">Estado</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="estadoMesa" v-model="entidad.estadoMesa" />
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-3">
+                                    <label for="eliminado" class="col-sm-3 col-form-label">Activo</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" v-model="entidad.eliminado" id="eliminado">
+                                            <option value="true">Si</option>
+                                            <option value="false">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" v-if="entidad.idMesa==0" @click="guardar">Guardar</button>
+                                <button type="button" class="btn btn-primary" v-if="entidad.idMesa!=0" @click="actualizar">Actualizar</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal" tabindex="-1" id="mdlEliminar">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Confirmar</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Estás seguro que quieres eliminar?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" @click="confimareliminacion">Eliminar</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
-
-
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.5.3/vue-resource.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script th:src="@{/js/mesas.js}"></script>
+</div>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+            <script th:src="@{/js/mesas.js}"></script>
 
 </body>
 </html>
