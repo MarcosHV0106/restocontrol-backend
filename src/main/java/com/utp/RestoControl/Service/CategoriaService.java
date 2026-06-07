@@ -18,13 +18,17 @@ public class CategoriaService {
 
     @Transactional(readOnly = true)
     public List<CategoriaAlimento> listar() {
-        return repository.findByEliminadoFalse();
+        return repository.findAll();
     }
 
     @Transactional(readOnly = true)
     public CategoriaAlimento buscarPorId(Integer id) {
-        return repository.findByIdCategoriaAndEliminadoFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Categoria no encontrada."));
+        return repository.findById(id)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(
+                                "Categoria no encontrada."
+                        )
+                );
     }
 
     @Transactional
@@ -45,6 +49,21 @@ public class CategoriaService {
         categoria.setDescripcion(normalizarOpcional(datos.getDescripcion()));
 
         return repository.save(categoria);
+    }
+
+    @Transactional
+    public void cambiarEstado(Integer id) {
+        CategoriaAlimento categoria =
+                repository.findById(id)
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException(
+                                        "Categoria no encontrada."
+                                )
+                        );
+        categoria.setEliminado(
+                !categoria.getEliminado()
+        );
+        repository.save(categoria);
     }
 
     @Transactional
