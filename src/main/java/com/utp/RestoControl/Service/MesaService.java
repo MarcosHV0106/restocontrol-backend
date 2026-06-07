@@ -1,4 +1,3 @@
-
 package com.utp.RestoControl.Service;
 
 import com.google.common.base.Preconditions;
@@ -14,12 +13,32 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class MesaService {
-    
+
     private final MesaRepository repository;
+
+    @Transactional(readOnly = true)
+    public List<Mesa> listar() {
+        return repository.findByEliminadoFalse();
+    }
+
+    @Transactional(readOnly = true)
+    public Integer contarMesasLibres() {
+        return repository.countByEstadoMesaAndEliminadoFalse("libre");
+    }
+
+    @Transactional(readOnly = true)
+    public Integer contarMesasOcupadas() {
+        return repository.countByEstadoMesaAndEliminadoFalse("ocupada");
+    }
+
+    @Transactional(readOnly = true)
+    public Integer contarMesasReservadas() {
+        return repository.countByEstadoMesaAndEliminadoFalse("reservada");
+    }
     
     @Transactional(readOnly = true)
-    public List<Mesa> listar(){
-        return repository.findByEliminadoFalse();
+    public Integer contarMesasPorCobrar() {
+        return repository.countByEstadoMesaAndEliminadoFalse("cobrar");
     }
 
     @Transactional(readOnly = true)
@@ -29,7 +48,7 @@ public class MesaService {
     }
 
     @Transactional
-    public Mesa guardar(Mesa mesa){
+    public Mesa guardar(Mesa mesa) {
         validarMesa(mesa, null);
         mesa.setIdMesa(null);
         mesa.setEliminado(false);

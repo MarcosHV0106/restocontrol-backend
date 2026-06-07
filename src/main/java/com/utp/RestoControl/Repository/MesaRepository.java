@@ -16,4 +16,7 @@ public interface MesaRepository extends JpaRepository<Mesa, Integer>{
     boolean existsByNumeroMesaAndEliminadoFalse(Integer numeroMesa);
 
     boolean existsByNumeroMesaAndIdMesaNotAndEliminadoFalse(Integer numeroMesa, Integer idMesa);
+    
+    Integer countByEstadoMesaAndEliminadoFalse(String estadoMesa);
+
 }
