@@ -47,6 +47,9 @@ public class Usuario {
     private Rol rol;
 
     @Column(nullable = false)
+    private Boolean disponible = true;
+
+    @Column(nullable = false)
     private Boolean eliminado = false;
     
     

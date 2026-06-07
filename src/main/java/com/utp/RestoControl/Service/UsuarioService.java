@@ -49,6 +49,7 @@ public class UsuarioService {
         usuario.setCorreo(normalizarCorreo(request.getCorreo()));
         usuario.setClave(normalizarObligatorio(request.getClave(), "La clave del usuario es obligatoria."));
         usuario.setRol(buscarRolActivo(obtenerIdRol(request)));
+        usuario.setDisponible(true);
         usuario.setEliminado(false);
 
         return repository.save(usuario);
