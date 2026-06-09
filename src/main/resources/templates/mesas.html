@@ -85,7 +85,7 @@
 
                                             <div class="d-flex align-items-center">
 
-                                                <i class="bi bi-people fs-1 text-danger me-3"></i>
+                                                <i class="bi bi-people fs-1 text-light me-3"></i>
 
                                                 <div>
                                                     <h6 class="mb-1">Mesas ocupadas</h6>
@@ -106,7 +106,7 @@
 
                                             <div class="d-flex align-items-center">
 
-                                                <i class="bi bi-calendar-check fs-1 text-primary me-3"></i>
+                                                <i class="bi bi-calendar-check fs-1 text-light me-3"></i>
 
                                                 <div>
                                                     <h6 class="mb-1">Próximas Reservas</h6>
@@ -253,50 +253,64 @@
 
                                     <div class="row g-3">
 
-                                        <div class="col-xl-3 col-lg-4 col-md-6"
-                                             v-for="item in mesasFiltradas">
+                                        <div class="col-12 col-sm-6 col-md-4 col-xl-3"
+                                             v-for="item in mesasFiltradas"
+                                             :key="item.idMesa">
 
-                                            <div class="card shadow-sm mesa-card"
+                                            <div class="mesa-card"
                                                  :class="{
-                                                 'mesa-libre': item.estadoMesa == 'libre',
-                                                 'mesa-ocupada': item.estadoMesa == 'ocupada',
-                                                 'mesa-reservada': item.estadoMesa == 'reservada',
-                                                 'mesa-cobrar': item.estadoMesa == 'cobrar',
-                                                 'mesa-seleccionada':
-                                                 mesaSeleccionada &&
-                                                 mesaSeleccionada.idMesa === item.idMesa
+                                                    'mesa-libre': item.estadoMesa == 'libre',
+                                                    'mesa-ocupada': item.estadoMesa == 'ocupada',
+                                                    'mesa-reservada': item.estadoMesa == 'reservada',
+                                                    'mesa-cobrar': item.estadoMesa == 'cobrar',
+                                                    'mesa-seleccionada':
+                                                    mesaSeleccionada &&
+                                                    mesaSeleccionada.idMesa === item.idMesa
                                                  }"
                                                  @click="seleccionarMesa(item)">
+                                                <div class="mesa-status-bar"></div>
+                                                <div class="mesa-icon">
+                                                    <i class="bi bi-cup-hot-fill"></i>
+                                                </div>
+                                                <div class="mesa-content">
+                                                    <div class="mesa-header">
+                                                        <span class="mesa-label">
+                                                            Mesa
+                                                        </span>
 
-                                                <div class="card-body">
+                                                        <h3 class="mesa-number">
+                                                            {{ item.numeroMesa }}
+                                                        </h3>
+                                                    </div>
 
-                                                    <h5>
-                                                        Mesa {{item.numeroMesa}}
-                                                    </h5>
+                                                    <div class="mesa-info">
+                                                        <div class="mesa-info-item">
+                                                            <i class="bi bi-people-fill"></i>
+                                                            {{ item.capacidad }} personas
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-3">
+                                                        <span class="mesa-badge libre"
+                                                              v-if="item.estadoMesa=='libre'">
+                                                            Libre
+                                                        </span>
 
-                                                    <p class="mb-3">
-                                                        Capacidad: {{item.capacidad}}
-                                                    </p>
+                                                        <span class="mesa-badge ocupada"
+                                                              v-if="item.estadoMesa=='ocupada'">
+                                                            Ocupada
+                                                        </span>
 
-                                                    <span class="badge bg-success"
-                                                          v-if="item.estadoMesa=='libre'">
-                                                        Libre
-                                                    </span>
+                                                        <span class="mesa-badge reservada"
+                                                              v-if="item.estadoMesa=='reservada'">
+                                                            Reservada
+                                                        </span>
 
-                                                    <span class="badge bg-danger"
-                                                          v-if="item.estadoMesa=='ocupada'">
-                                                        Ocupada
-                                                    </span>
+                                                        <span class="mesa-badge cobrar"
+                                                              v-if="item.estadoMesa=='cobrar'">
+                                                            Por Cobrar
+                                                        </span>
 
-                                                    <span class="badge bg-primary"
-                                                          v-if="item.estadoMesa=='reservada'">
-                                                        Reservada
-                                                    </span>
-
-                                                    <span class="badge bg-warning text-dark"
-                                                          v-if="item.estadoMesa=='cobrar'">
-                                                        Por cobrar
-                                                    </span>
+                                                    </div>
 
                                                 </div>
 
@@ -608,11 +622,9 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.5.3/vue-resource.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script th:src="@{/js/mesas.js}"></script>
+<script th:src="@{/js/logout.js}"></script>
 
 </body>
 </html>

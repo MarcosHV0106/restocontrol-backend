@@ -63,6 +63,19 @@
                     </ul>
                 </div>
 
+                <div class="p-3 border-top">
+
+                    <button
+                            id="btnLogout"
+                            class="btn btn-outline-danger w-100">
+
+                        <i class="bi bi-box-arrow-right me-2"></i>
+                        Cerrar Sesión
+
+                    </button>
+
+                </div>
+
                 <div class="p-3 mt-auto border-top">
                     <div class="version-box p-3 rounded-3 text-center">
                         <div class="text-muted" style="font-size:0.75rem;">Versión del Sistema</div>
@@ -71,5 +84,22 @@
                 </div>
             </aside>
         </div>
+
+
+        <script>
+
+            function cerrarSesion(){
+
+                if(!confirm("¿Desea cerrar sesión?")){
+                    return;
+                }
+
+                localStorage.removeItem("usuario");
+
+                window.location.href="/login";
+
+            }
+
+        </script>
     </body>
 </html>
