@@ -3,8 +3,13 @@ new Vue({
     data: {
         entidades: [],
         entidad: [],
+        mesaSeleccionada: null,
         busqueda: "",
         estadoFiltro: "",
+        cantidadPersonas: 1,
+        mesasParaUnir: [],
+
+        mesasSeleccionadasUnir: [],
         resumen: {
             libres: 0,
             ocupadas: 0,
@@ -98,6 +103,74 @@ new Vue({
             this.estadoFiltro = "";
 
         },
+        seleccionarMesa: function (item) {
+
+            this.mesaSeleccionada = item;
+
+        },
+        abrirModalApertura: function () {
+
+            this.cantidadPersonas = 1;
+
+            const modal = new bootstrap.Modal(
+                    document.getElementById('mdlAperturaMesa')
+                    );
+
+            modal.show();
+
+        },
+        confirmarAperturaMesa: function () {
+
+            console.log(
+                    "Mesa:",
+                    this.mesaSeleccionada.numeroMesa
+                    );
+
+            console.log(
+                    "Personas:",
+                    this.cantidadPersonas
+                    );
+
+            const modal =
+                    bootstrap.Modal.getInstance(
+                            document.getElementById('mdlAperturaMesa')
+                            );
+
+            modal.hide();
+
+        },
+
+        abrirModalUnion: function () {
+
+            this.mesasSeleccionadasUnir = [];
+
+            this.mesasParaUnir = this.entidades.filter(mesa =>
+                mesa.estadoMesa === 'libre' &&
+                        mesa.idMesa !== this.mesaSeleccionada.idMesa
+
+            );
+
+            const modal = new bootstrap.Modal(
+                    document.getElementById('mdlUnirMesas')
+                    );
+
+            modal.show();
+
+        },
+        
+        confirmarUnionMesas: function() {
+
+    console.log(
+        "Mesa principal:",
+        this.mesaSeleccionada.idMesa
+    );
+
+    console.log(
+        "Mesas unidas:",
+        this.mesasSeleccionadasUnir
+    );
+
+}
     },
     mounted: function () {
         this.listar();
