@@ -1,0 +1,290 @@
+/* =========================
+   CONTENEDOR GENERAL
+========================= */
+
+.pedido-container{
+    display: flex;
+    gap: 20px;
+    min-height: calc(100vh - 120px);
+}
+
+/* =========================
+   PANEL IZQUIERDO
+========================= */
+
+.productos-section{
+    flex: 1;
+}
+
+/* =========================
+   TARJETAS SUPERIORES
+========================= */
+
+.info-card{
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 12px 15px;
+    height: 100%;
+}
+
+.info-card .titulo{
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.info-card .valor{
+    font-weight: 600;
+    color: #343a40;
+}
+
+/* =========================
+   CATEGORÍAS
+========================= */
+
+.categoria-btn{
+    border-radius: 8px;
+    font-size: 13px;
+    padding: 8px 14px;
+}
+
+.categoria-btn.active{
+    background: #dc7544;
+    border-color: #dc7544;
+    color: white;
+}
+
+/* =========================
+   PRODUCTOS
+========================= */
+
+.product-card{
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: .25s;
+    cursor: pointer;
+}
+
+.product-card:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,.08);
+}
+
+.product-image{
+    height: 150px;
+    background: #f4f1ed;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-image i{
+    font-size: 50px;
+    color: #d8d2cb;
+}
+
+.product-name{
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.product-price{
+    color: #dc7544;
+    font-weight: 700;
+}
+
+/* =========================
+   PANEL DERECHO
+========================= */
+
+.pedido-sidebar{
+    width: 330px;
+    min-width: 330px;
+}
+
+.pedido-card{
+    background: white;
+    border-radius: 12px;
+    border: none;
+    overflow: hidden;
+}
+
+.pedido-header{
+    padding: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid #ececec;
+}
+
+/* =========================
+   ITEMS DEL PEDIDO
+========================= */
+
+.pedido-item{
+    background: #faf8f5;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.pedido-item-name{
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.pedido-item-price{
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.qty-btn{
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 6px;
+}
+
+/* =========================
+   TOTALES
+========================= */
+
+.resumen-linea{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.total-final{
+    display: flex;
+    justify-content: space-between;
+
+    font-size: 22px;
+    font-weight: 700;
+    color: #212529;
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.btn-resto{
+    background: #dc7544;
+    border-color: #dc7544;
+    color: white;
+}
+
+.btn-resto:hover{
+    background: #c76639;
+    border-color: #c76639;
+    color: white;
+}
+
+/* =========================
+   SCROLL PRODUCTOS
+========================= */
+
+.product-grid{
+    max-height: calc(100vh - 320px);
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Scroll bonito */
+
+.product-grid::-webkit-scrollbar{
+    width: 6px;
+}
+
+.product-grid::-webkit-scrollbar-thumb{
+    background: #d2d2d2;
+    border-radius: 10px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width: 992px){
+
+    .pedido-container{
+        flex-direction: column;
+    }
+
+    .pedido-sidebar{
+        width: 100%;
+        min-width: 100%;
+    }
+
+}
+
+.pedido-card{
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.pedido-body{
+    padding:16px;
+}
+
+.pedido-item{
+    background:#faf8f5;
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:12px;
+}
+
+.pedido-item-info{
+    margin-bottom:10px;
+}
+
+.pedido-item-name{
+    font-weight:600;
+}
+
+.pedido-item-price{
+    color:#6c757d;
+    font-size:.9rem;
+}
+
+.pedido-item-actions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+}
+
+.qty-btn{
+    width:34px;
+    height:34px;
+    padding:0;
+}
+
+.qty-value{
+    min-width:20px;
+    text-align:center;
+}
+
+.pedido-item-subtotal{
+    text-align:right;
+    margin-top:10px;
+    font-weight:600;
+    color:#dc7544;
+}
+
+.resumen-linea{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+}
+
+.total-final{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:1.5rem;
+    font-weight:700;
+}
