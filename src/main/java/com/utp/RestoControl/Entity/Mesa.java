@@ -31,6 +31,9 @@ public class Mesa {
     @Column(name = "capacidad", nullable = false)
     private Integer capacidad;
     
+    @Column(name = "piso", nullable = false)
+    private Integer piso;
+    
     @Column(name = "estado_mesa", nullable = false, length = 30)
     @JsonAlias("estado_mesa")
     private String estadoMesa;

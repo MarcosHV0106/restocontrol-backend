@@ -1,4 +1,4 @@
-const { createApp } = Vue;
+const {createApp} = Vue;
 
 createApp({
 
@@ -17,6 +17,7 @@ createApp({
             mesaSeleccionada: null,
 
             busqueda: "",
+            pisoFiltro: "",
             estadoFiltro: "",
 
             cantidadPersonas: 1,
@@ -41,20 +42,36 @@ createApp({
             return this.entidades.filter(mesa => {
 
                 const coincideBusqueda =
-                    !this.busqueda ||
-                    mesa.numeroMesa
+                        !this.busqueda ||
+                        mesa.numeroMesa
                         .toString()
                         .includes(this.busqueda);
 
                 const coincideEstado =
-                    !this.estadoFiltro ||
-                    mesa.estadoMesa.toLowerCase() === this.estadoFiltro;
+                        !this.estadoFiltro ||
+                        mesa.estadoMesa.toLowerCase() === this.estadoFiltro;
 
-                return coincideBusqueda && coincideEstado;
+                const coincidePiso =
+                        !this.pisoFiltro ||
+                        mesa.piso == this.pisoFiltro;
+
+                
+
+                return coincideBusqueda && coincideEstado && coincidePiso;
 
             });
 
+        },
+        pisosDisponibles() {
+
+            const pisos =
+                    this.entidades.map(mesa => mesa.piso);
+
+            return [...new Set(pisos)]
+                    .sort((a, b) => a - b);
+
         }
+
 
     },
 
@@ -84,14 +101,16 @@ createApp({
 
             this.entidad = {
                 idMesa: 0,
-                nombre: "",
-                descripcion: "",
-                activo: true
+                numeroMesa: "",
+                capacidad: "",
+                piso: "",
+                estadoMesa: "libre",
+                eliminado: false
             };
 
             const modal = new bootstrap.Modal(
-                document.getElementById('mdlEntidad')
-            );
+                    document.getElementById('mdlEntidad')
+                    );
 
             modal.show();
 
@@ -102,7 +121,7 @@ createApp({
             try {
 
                 const response =
-                    await fetch(`/api/mesas/${idMesa}`);
+                        await fetch(`/api/mesas/${idMesa}`);
 
                 if (!response.ok) {
                     throw new Error('Error al obtener mesa');
@@ -111,8 +130,8 @@ createApp({
                 this.entidad = await response.json();
 
                 const modal = new bootstrap.Modal(
-                    document.getElementById('mdlEntidad')
-                );
+                        document.getElementById('mdlEntidad')
+                        );
 
                 modal.show();
 
@@ -144,10 +163,10 @@ createApp({
                 await this.cargarResumenEstados();
 
                 bootstrap.Modal
-                    .getInstance(
-                        document.getElementById('mdlEntidad')
-                    )
-                    ?.hide();
+                        .getInstance(
+                                document.getElementById('mdlEntidad')
+                                )
+                        ?.hide();
 
             } catch (error) {
 
@@ -162,14 +181,14 @@ createApp({
             try {
 
                 const response = await fetch(
-                    `/api/mesas/${this.entidad.idMesa}`,
-                    {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(this.entidad)
-                    }
+                        `/api/mesas/${this.entidad.idMesa}`,
+                        {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(this.entidad)
+                        }
                 );
 
                 if (!response.ok) {
@@ -180,10 +199,10 @@ createApp({
                 await this.cargarResumenEstados();
 
                 bootstrap.Modal
-                    .getInstance(
-                        document.getElementById('mdlEntidad')
-                    )
-                    ?.hide();
+                        .getInstance(
+                                document.getElementById('mdlEntidad')
+                                )
+                        ?.hide();
 
             } catch (error) {
 
@@ -198,8 +217,8 @@ createApp({
             this.entidad.idMesa = idMesa;
 
             const modal = new bootstrap.Modal(
-                document.getElementById('mdlEliminar')
-            );
+                    document.getElementById('mdlEliminar')
+                    );
 
             modal.show();
 
@@ -210,10 +229,10 @@ createApp({
             try {
 
                 const response = await fetch(
-                    `/api/mesas/${this.entidad.idMesa}`,
-                    {
-                        method: 'DELETE'
-                    }
+                        `/api/mesas/${this.entidad.idMesa}`,
+                        {
+                            method: 'DELETE'
+                        }
                 );
 
                 if (!response.ok) {
@@ -224,10 +243,10 @@ createApp({
                 await this.cargarResumenEstados();
 
                 bootstrap.Modal
-                    .getInstance(
-                        document.getElementById('mdlEliminar')
-                    )
-                    ?.hide();
+                        .getInstance(
+                                document.getElementById('mdlEliminar')
+                                )
+                        ?.hide();
 
             } catch (error) {
 
@@ -242,7 +261,7 @@ createApp({
             try {
 
                 const response =
-                    await fetch('/api/mesas/resumen');
+                        await fetch('/api/mesas/resumen');
 
                 if (!response.ok) {
                     throw new Error('Error al cargar resumen');
@@ -262,7 +281,7 @@ createApp({
 
             this.busqueda = "";
             this.estadoFiltro = "";
-
+            this.pisoFiltro = "";
         },
 
         seleccionarMesa(item) {
@@ -276,8 +295,8 @@ createApp({
             this.cantidadPersonas = 1;
 
             const modal = new bootstrap.Modal(
-                document.getElementById('mdlAperturaMesa')
-            );
+                    document.getElementById('mdlAperturaMesa')
+                    );
 
             modal.show();
 
@@ -286,20 +305,20 @@ createApp({
         confirmarAperturaMesa() {
 
             console.log(
-                'Mesa:',
-                this.mesaSeleccionada?.numeroMesa
-            );
+                    'Mesa:',
+                    this.mesaSeleccionada?.numeroMesa
+                    );
 
             console.log(
-                'Personas:',
-                this.cantidadPersonas
-            );
+                    'Personas:',
+                    this.cantidadPersonas
+                    );
 
             bootstrap.Modal
-                .getInstance(
-                    document.getElementById('mdlAperturaMesa')
-                )
-                ?.hide();
+                    .getInstance(
+                            document.getElementById('mdlAperturaMesa')
+                            )
+                    ?.hide();
 
         },
 
@@ -308,14 +327,14 @@ createApp({
             this.mesasSeleccionadasUnir = [];
 
             this.mesasParaUnir =
-                this.entidades.filter(mesa =>
-                    mesa.estadoMesa === 'libre' &&
-                    mesa.idMesa !== this.mesaSeleccionada?.idMesa
-                );
+                    this.entidades.filter(mesa =>
+                        mesa.estadoMesa === 'libre' &&
+                                mesa.idMesa !== this.mesaSeleccionada?.idMesa
+                    );
 
             const modal = new bootstrap.Modal(
-                document.getElementById('mdlUnirMesas')
-            );
+                    document.getElementById('mdlUnirMesas')
+                    );
 
             modal.show();
 
@@ -324,14 +343,14 @@ createApp({
         confirmarUnionMesas() {
 
             console.log(
-                'Mesa principal:',
-                this.mesaSeleccionada?.idMesa
-            );
+                    'Mesa principal:',
+                    this.mesaSeleccionada?.idMesa
+                    );
 
             console.log(
-                'Mesas unidas:',
-                this.mesasSeleccionadasUnir
-            );
+                    'Mesas unidas:',
+                    this.mesasSeleccionadasUnir
+                    );
 
         }
 

@@ -51,6 +51,7 @@ public class MesaService {
     public Mesa guardar(Mesa mesa) {
         validarMesa(mesa, null);
         mesa.setIdMesa(null);
+        mesa.setEstadoMesa("libre");
         mesa.setEliminado(false);
 
         return repository.save(mesa);
@@ -63,6 +64,7 @@ public class MesaService {
 
         mesa.setNumeroMesa(datos.getNumeroMesa());
         mesa.setCapacidad(datos.getCapacidad());
+        mesa.setPiso(datos.getPiso());
         mesa.setEstadoMesa(datos.getEstadoMesa().trim());
 
         return repository.save(mesa);
@@ -79,7 +81,8 @@ public class MesaService {
         Preconditions.checkArgument(mesa != null, "La mesa es obligatoria.");
         Preconditions.checkArgument(mesa.getNumeroMesa() != null && mesa.getNumeroMesa() > 0, "El numero de mesa debe ser mayor a cero.");
         Preconditions.checkArgument(mesa.getCapacidad() != null && mesa.getCapacidad() > 0, "La capacidad debe ser mayor a cero.");
-
+        Preconditions.checkArgument(mesa.getPiso() != null && mesa.getPiso() > 0, "El piso debe ser mayor a cero.");
+        
         String estado = mesa.getEstadoMesa() == null ? null : mesa.getEstadoMesa().trim();
         Preconditions.checkArgument(!Strings.isNullOrEmpty(estado), "El estado de la mesa es obligatorio.");
 

@@ -167,6 +167,28 @@
 
                                         </div>
 
+                                        <div class="col-md-2">
+
+                                            <select class="form-select"
+                                                    v-model="pisoFiltro">
+
+                                                <option value="">
+                                                    Todos los pisos
+                                                </option>
+
+                                                <option
+                                                    v-for="piso in pisosDisponibles"
+                                                    :key="piso"
+                                                    :value="piso">
+
+                                                    Piso {{ piso }}
+
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
                                         <!-- Estado -->
                                         <div class="col-md-3">
 
@@ -237,9 +259,57 @@
                                             <span class="estado-dot reservada"></span>
                                             <span>Reservada</span>
                                         </div>
-
+                                        <p class="text-end">
+                                            <button class="btn btn-primary" @click="nuevo">Nuevo</button>
+                                        </p>
                                     </div>
 
+                                </div>
+                            </div>
+
+                            <div class="modal" tabindex="-1" id="mdlEntidad">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Editar</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group row">
+                                                <label for="numeroMesa" class="col-sm-2 col-form-label">Numero de Mesa</label>
+                                                <div class="col-sm-10">
+                                                    <input class="form-control" id="numeroMesa" v-model="entidad.numeroMesa" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="capacidad" class="col-sm-2 col-form-label">Capacidad</label>
+                                                <div class="col-sm-10">
+                                                    <input class="form-control" id="capacidad" v-model="entidad.capacidad" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="piso" class="col-sm-2 col-form-label">Zona</label>
+                                                <div class="col-sm-10">
+                                                    <input class="form-control" id="piso" v-model="entidad.piso" />
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="eliminado" class="col-sm-2 col-form-label">Activo</label>
+                                                <div class="col-sm-10">
+                                                    <select class="form-control" v-model="entidad.eliminado" id="eliminado">
+                                                        <option value="true">Si</option>
+                                                        <option value="false">No</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" v-if="entidad.idMesa==0" @click="guardar">Guardar</button>
+                                            <button type="button" class="btn btn-primary" v-if="entidad.idMesa!=0" @click="actualizar">Actualizar</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -259,13 +329,13 @@
 
                                             <div class="mesa-card"
                                                  :class="{
-                                                    'mesa-libre': item.estadoMesa == 'libre',
-                                                    'mesa-ocupada': item.estadoMesa == 'ocupada',
-                                                    'mesa-reservada': item.estadoMesa == 'reservada',
-                                                    'mesa-cobrar': item.estadoMesa == 'cobrar',
-                                                    'mesa-seleccionada':
-                                                    mesaSeleccionada &&
-                                                    mesaSeleccionada.idMesa === item.idMesa
+                                                 'mesa-libre': item.estadoMesa == 'libre',
+                                                 'mesa-ocupada': item.estadoMesa == 'ocupada',
+                                                 'mesa-reservada': item.estadoMesa == 'reservada',
+                                                 'mesa-cobrar': item.estadoMesa == 'cobrar',
+                                                 'mesa-seleccionada':
+                                                 mesaSeleccionada &&
+                                                 mesaSeleccionada.idMesa === item.idMesa
                                                  }"
                                                  @click="seleccionarMesa(item)">
                                                 <div class="mesa-status-bar"></div>
@@ -426,7 +496,7 @@
                                                 Unir Mesas
 
                                             </button>
-
+                                            <button class="btn btn-primary" @click="editar(mesaSeleccionada.idMesa)">Editar</button>
                                         </div>
 
                                     </div>
@@ -534,12 +604,16 @@
 
                                                     </h5>
 
+
                                                     <button type="button"
                                                             class="btn-close"
                                                             data-bs-dismiss="modal">
                                                     </button>
 
                                                 </div>
+
+                                                <p></p>
+                                                <h6>    Selecciona las mesas a unir</h6>
 
                                                 <div class="modal-body">
 
@@ -573,10 +647,10 @@
 
                                                 </div>
 
-                                                <div class="modal-footer">
+                                                <div class="modal-footer justify-content-center">
 
                                                     <button
-                                                        class="btn btn-cancelar-union"
+                                                        class="btn btn-cancelar-union w-30"
                                                         data-bs-dismiss="modal">
 
                                                         Cancelar
@@ -584,7 +658,7 @@
                                                     </button>
 
                                                     <button
-                                                        class="btn btn-mesa"
+                                                        class="btn btn-mesa w-30"
                                                         @click="confirmarUnionMesas">
 
                                                         Confirmar
