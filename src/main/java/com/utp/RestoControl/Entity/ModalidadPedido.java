@@ -1,4 +1,3 @@
-
 package com.utp.RestoControl.Entity;
 
 import jakarta.persistence.Column;
@@ -22,8 +21,11 @@ public class ModalidadPedido {
      @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_modalidad_pedido")
-    private Integer idModalidaPedido;
+    private Integer idModalidadPedido;
     
     @Column(name = "nombre", nullable = false, length = 20)
     private String nombreModalidad;
+    
+    @Column(nullable = false)
+    private Boolean eliminado = false;
 }

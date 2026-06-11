@@ -6,7 +6,10 @@
     </head>
 
     <body>
-        <div id="app">
+        <div id="app"
+
+             th:data-id-mesa="${idMesa}"
+             th:data-personas="${personas}">
 
             <div class="layout">
 
@@ -32,14 +35,16 @@
                                     <div class="col-md-3">
                                         <div class="info-card">
                                             <div class="titulo">Mesa</div>
-                                            <div class="valor">Mesa 1</div>
+                                            <div class="valor">
+                                                Mesa {{ idMesa }}
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div class="col-md-3">
                                         <div class="info-card">
                                             <div class="titulo">Fecha</div>
-                                            <div class="valor">15/05/2026</div>
+                                            <div class="valor">{{ fechaActual }}</div>
                                         </div>
                                     </div>
 
@@ -53,7 +58,7 @@
                                     <div class="col-md-3">
                                         <div class="info-card">
                                             <div class="titulo">Mesero / Clientes</div>
-                                            <div class="valor">Juan Díaz / 4</div>
+                                            <div class="valor">Juan Díaz / {{ personas }}</div>
                                         </div>
                                     </div>
 

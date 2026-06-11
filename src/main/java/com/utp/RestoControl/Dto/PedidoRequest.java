@@ -1,6 +1,7 @@
 
 package com.utp.RestoControl.Dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,10 +13,15 @@ import lombok.Setter;
 public class PedidoRequest {
 
     private Integer idMesa;
+
     private Integer idUsuario;
+
     private Integer idModalidadPedido;
+
     private Integer idEstadoPedido;
 
     private String observacion;
+
+    private List<DetallePedidoRequest> detalles;
 
 }

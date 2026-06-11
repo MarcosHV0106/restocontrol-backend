@@ -29,5 +29,7 @@ public class EstadoPedido {
     @Column(name = "nombre", nullable = false, length = 30)
     private String nombreEstado;
     
+    @Column(nullable = false)
+    private Boolean eliminado = false;
     
 }

@@ -10,7 +10,8 @@ createApp({
 
             categoriaSeleccionada: null,
 
-            pedido: []
+            pedido: [],
+            fechaActual: ""
 
         };
     },
@@ -138,12 +139,31 @@ createApp({
 
             }
 
+        },
+        obtenerFechaActual() {
+
+            const hoy = new Date();
+
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+            const anio = hoy.getFullYear();
+
+            this.fechaActual = `${dia}/${mes}/${anio}`;
+
         }
 
     },
 
     mounted() {
+        const app = document.getElementById("app");
 
+        this.idMesa =
+                app.dataset.idMesa;
+
+        this.personas =
+                app.dataset.personas;
+
+        this.obtenerFechaActual();
         this.cargarCategorias();
         this.cargarAlimentos();
 

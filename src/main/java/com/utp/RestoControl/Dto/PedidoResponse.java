@@ -6,7 +6,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public class PedidoResponse {
+
     private Integer idPedido;
 
     private LocalDateTime fechaPedido;
@@ -15,15 +19,16 @@ public class PedidoResponse {
 
     private String observacion;
 
-    //private MesaResponse mesa;
+    private MesaResponse mesa;
 
     private UsuarioResponse usuario;
 
-    //private EstadoPedidoResponse estadoPedido;
+    private EstadoPedidoResponse estadoPedido;
 
-    //private ModalidadPedidoResponse modalidadPedido;
-/*
-    public static PedidoResponse from(Pedido pedido){
+    private ModalidadPedidoResponse modalidadPedido;
+
+    public static PedidoResponse from(
+            Pedido pedido){
 
         return new PedidoResponse(
 
@@ -53,6 +58,6 @@ public class PedidoResponse {
 
         );
 
-    }*/
+    }
 
 }

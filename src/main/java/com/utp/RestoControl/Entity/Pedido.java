@@ -1,12 +1,12 @@
-
 package com.utp.RestoControl.Entity;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "pedidos")
@@ -22,7 +22,6 @@ public class Pedido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(name = "id_pedido")
     private Integer idPedido;
 
@@ -36,30 +35,34 @@ public class Pedido {
 
     @Column(name = "observacion", length = 250)
     private String observacion;
-    
+
     @Column(nullable = false)
     private Boolean eliminado = false;
-    
-    
-    
+
     @ManyToOne
     @JoinColumn(name = "id_modalidad_pedido",
-                nullable = false)
-     private ModalidadPedido modalidadPedido;
-    
+            nullable = false)
+    private ModalidadPedido modalidadPedido;
+
     @ManyToOne
     @JoinColumn(name = "id_mesa",
-                nullable = false)
-     private Mesa idMesa;
-    
+            nullable = false)
+    private Mesa idMesa;
+
     @ManyToOne
     @JoinColumn(name = "id_usuario",
-                nullable = false)
-     private Usuario idUsuario;
-    
+            nullable = false)
+    private Usuario idUsuario;
+
     @ManyToOne
     @JoinColumn(name = "id_estado_pedido",
-                nullable = false)
-     private EstadoPedido estadoPedido;
+            nullable = false)
+    private EstadoPedido estadoPedido;
+
+    @OneToMany(
+            mappedBy = "idPedido",
+            cascade = CascadeType.ALL
+    )
+    private List<DetallePedido> detalles;
 
 }

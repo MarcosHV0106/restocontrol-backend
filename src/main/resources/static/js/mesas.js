@@ -55,7 +55,7 @@ createApp({
                         !this.pisoFiltro ||
                         mesa.piso == this.pisoFiltro;
 
-                
+
 
                 return coincideBusqueda && coincideEstado && coincidePiso;
 
@@ -304,21 +304,11 @@ createApp({
 
         confirmarAperturaMesa() {
 
-            console.log(
-                    'Mesa:',
-                    this.mesaSeleccionada?.numeroMesa
-                    );
+            const idMesa = this.mesaSeleccionada.idMesa;
+            const personas = this.cantidadPersonas;
 
-            console.log(
-                    'Personas:',
-                    this.cantidadPersonas
-                    );
-
-            bootstrap.Modal
-                    .getInstance(
-                            document.getElementById('mdlAperturaMesa')
-                            )
-                    ?.hide();
+            window.location.href =
+                    `/pedidos?idMesa=${idMesa}&personas=${personas}`;
 
         },
 
