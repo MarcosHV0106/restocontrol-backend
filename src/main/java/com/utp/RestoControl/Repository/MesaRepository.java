@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 
 public interface MesaRepository extends JpaRepository<Mesa, Integer>{
-
+ 
     List<Mesa> findByEliminadoFalse();
 
     Optional<Mesa> findByIdMesaAndEliminadoFalse(Integer idMesa);

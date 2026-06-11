@@ -1,5 +1,7 @@
 package com.utp.RestoControl.Controller.api;
 
+import com.utp.RestoControl.Dto.MesaRequest;
+import com.utp.RestoControl.Dto.MesaResponse;
 import com.utp.RestoControl.Entity.Mesa;
 import com.utp.RestoControl.Service.MesaService;
 import java.util.HashMap;
@@ -26,25 +28,48 @@ public class MesaController {
     private final MesaService service;
 
     @GetMapping
-    public List<Mesa> listar() {
-        return service.listar();
+    public List<MesaResponse> listar() {
+
+        return service.listar()
+                .stream()
+                .map(MesaResponse::from)
+                .toList();
+
     }
 
     @GetMapping("{id}")
-    public Mesa buscarPorId(@PathVariable Integer id) {
-        return service.buscarPorId(id);
+    public MesaResponse buscarPorId(
+            @PathVariable Integer id) {
+
+        return MesaResponse.from(
+                service.buscarPorId(id)
+        );
+
     }
 
     @PostMapping
-    public ResponseEntity<Mesa> guardar(@RequestBody Mesa mesa) {
+    public ResponseEntity<MesaResponse> guardar(
+            @RequestBody MesaRequest request) {
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(service.guardar(mesa));
+                .body(
+                        MesaResponse.from(
+                                service.guardar(request)
+                        )
+                );
+
     }
 
     @PutMapping("{id}")
-    public Mesa actualizar(@PathVariable Integer id, @RequestBody Mesa mesa) {
-        return service.actualizar(id, mesa);
+    public MesaResponse actualizar(
+            @PathVariable Integer id,
+            @RequestBody MesaRequest request) {
+
+        return MesaResponse.from(
+                service.actualizar(id, request)
+        );
+
     }
 
     @DeleteMapping("{id}")
