@@ -1,8 +1,8 @@
 package com.utp.RestoControl.Controller.api;
 
-
 import com.utp.RestoControl.Dto.PedidoRequest;
 import com.utp.RestoControl.Dto.PedidoResponse;
+import com.utp.RestoControl.Entity.Pedido;
 import com.utp.RestoControl.Service.PedidoService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +32,24 @@ public class PedidoController {
                         )
                 );
 
+    }
+
+    @GetMapping("/mesa/{idMesa}")
+    public ResponseEntity<PedidoResponse> buscarPorMesa(
+            @PathVariable Integer idMesa) {
+
+        Pedido pedido
+                = service.buscarUltimoPorMesa(idMesa);
+
+        if (pedido == null) {
+
+            return ResponseEntity.ok(null);
+
+        }
+
+        return ResponseEntity.ok(
+                PedidoResponse.from(pedido)
+        );
     }
 
 }

@@ -168,10 +168,31 @@ public class PedidoService {
 
         pedido = pedidoRepository.save(pedido);
 
+        detalleRepository.saveAll(detalles);
+
+        pedido.setTotal(totalPedido);
+
+        pedido = pedidoRepository.save(pedido);
+
+        pedido.setDetalles(detalles);
+
         mesa.setEstadoMesa("ocupada");
 
-        mesaService.actualizarEstado(mesa.getIdMesa(),"ocupada");
+        mesaService.actualizarEstado(mesa.getIdMesa(), "ocupada");
 
         return pedido;
+
+    }
+
+    @Transactional(readOnly = true)
+    public Pedido buscarUltimoPorMesa(
+            Integer idMesa) {
+
+        return pedidoRepository
+                .findTopByIdMesa_IdMesaAndEliminadoFalseOrderByIdPedidoDesc(
+                        idMesa
+                )
+                .orElse(null);
+
     }
 }

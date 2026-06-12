@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-
 public interface PedidoRepository
         extends JpaRepository<Pedido, Integer> {
 
@@ -13,5 +12,9 @@ public interface PedidoRepository
 
     Optional<Pedido> findByIdPedidoAndEliminadoFalse(
             Integer idPedido);
+
+    Optional<Pedido> findTopByIdMesa_IdMesaAndEliminadoFalseOrderByIdPedidoDesc(
+            Integer idMesa
+    );
 
 }

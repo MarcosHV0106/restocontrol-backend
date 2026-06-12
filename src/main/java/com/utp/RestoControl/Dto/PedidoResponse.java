@@ -1,9 +1,9 @@
-
 package com.utp.RestoControl.Dto;
 
 import com.utp.RestoControl.Entity.Pedido;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -27,35 +27,34 @@ public class PedidoResponse {
 
     private ModalidadPedidoResponse modalidadPedido;
 
+    private List<DetallePedidoResponse> detalles;
+
     public static PedidoResponse from(
-            Pedido pedido){
+            Pedido pedido) {
 
         return new PedidoResponse(
-
                 pedido.getIdPedido(),
-
                 pedido.getFechaPedido(),
-
                 pedido.getTotal(),
-
                 pedido.getObservacion(),
-
                 MesaResponse.from(
                         pedido.getIdMesa()
                 ),
-
                 UsuarioResponse.from(
                         pedido.getIdUsuario()
                 ),
-
                 EstadoPedidoResponse.from(
                         pedido.getEstadoPedido()
                 ),
-
                 ModalidadPedidoResponse.from(
                         pedido.getModalidadPedido()
-                )
-
+                ),
+                pedido.getDetalles()
+                        .stream()
+                        .map(
+                                DetallePedidoResponse::from
+                        )
+                        .toList()
         );
 
     }

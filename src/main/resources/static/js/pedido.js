@@ -156,11 +156,11 @@ createApp({
                 const resultado =
                         await response.json();
 
-                alert("Pedido registrado correctamente");
+                alert(`Pedido registrado correctamente para la Mesa ${this.idMesa}`);
 
                 this.pedido = [];
 
-                console.log(resultado);
+                window.location.replace("/mesas");
 
             } catch (error) {
 

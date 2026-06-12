@@ -1,5 +1,4 @@
 const {createApp} = Vue;
-
 createApp({
 
     data() {
@@ -88,6 +87,19 @@ createApp({
                 }
 
                 this.entidades = await response.json();
+                console.log(this.entidades);
+
+                for (const mesa of this.entidades) {
+
+                    const response =
+                            await fetch(`/api/pedidos/mesa/${mesa.idMesa}`);
+                    const texto =
+                            await response.text();
+
+                    mesa.pedido =
+                            texto ? JSON.parse(texto) : null;
+
+                }
 
             } catch (error) {
 
