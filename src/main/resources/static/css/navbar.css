@@ -1,0 +1,273 @@
+/* ==========================================
+   NAVBAR STYLES - RESTOCONTROL
+   ========================================== */
+
+:root {
+    --brand-primary: #df7a48;
+    --brand-secondary: #e67e22;
+    --brand-tertiary: #f39c12;
+    --dark-text: #2c1a11;
+    --light-text: #7f8c8d;
+    --border-light: #e8e0d7;
+}
+
+/* Navbar Container */
+.navbar-custom {
+    background-color: white !important;
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 1rem 2rem !important;
+    gap: 2rem;
+}
+
+/* Left Section - Date */
+.navbar-left {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.navbar-left .d-flex {
+    background-color: #f8f5f1 !important;
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    color: var(--light-text);
+}
+
+.navbar-left i {
+    margin-right: 0.5rem;
+}
+
+/* Center Section - Search */
+.navbar-center {
+    display: flex;
+    justify-content: center;
+}
+
+.navbar-center .input-group {
+    max-width: 350px;
+    width: 100%;
+}
+
+.navbar-center .input-group-text {
+    background-color: #f8f5f1 !important;
+    border: none;
+    color: var(--light-text);
+}
+
+.navbar-center .form-control {
+    background-color: #f8f5f1 !important;
+    border: none;
+    color: var(--dark-text);
+    font-size: 0.9rem;
+}
+
+.navbar-center .form-control::placeholder {
+    color: #bbb;
+}
+
+.navbar-center .form-control:focus {
+    background-color: #f8f5f1 !important;
+    color: var(--dark-text);
+    box-shadow: none;
+    outline: none;
+}
+
+/* Right Section - Notifications and User */
+.navbar-right {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.navbar-right i.bi-bell {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--light-text);
+}
+
+.navbar-right i.bi-bell:hover {
+    color: var(--brand-primary);
+    transform: scale(1.1);
+}
+
+/* User Dropdown */
+.dropdown {
+    position: relative;
+}
+
+#userDropdownToggle {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#userDropdownToggle:hover {
+    opacity: 0.8;
+}
+
+#userDropdownToggle .rounded-circle {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+#userDropdownToggle .text-end {
+    line-height: 1.2;
+}
+
+#userDropdownToggle .fw-bold {
+    font-size: 0.9rem;
+    color: var(--dark-text);
+}
+
+#userDropdownToggle .text-muted {
+    font-size: 0.75rem;
+    color: var(--light-text);
+}
+
+#userDropdownToggle .bi-chevron-down {
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Dropdown Menu Styles */
+.dropdown-menu {
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    min-width: 250px;
+    margin-top: 0.5rem;
+}
+
+.dropdown-menu li {
+    padding: 0;
+}
+
+.dropdown-menu .px-3.py-2 {
+    padding: 0.75rem 1rem !important;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.dropdown-menu .rounded-circle {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.dropdown-menu .dropdown-item {
+    color: var(--dark-text);
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #f8f5f1;
+    color: var(--brand-primary);
+    border-radius: 0;
+    padding-left: 1.2rem;
+}
+
+.dropdown-menu .dropdown-item.text-danger {
+    color: #dc3545 !important;
+}
+
+.dropdown-menu .dropdown-item.text-danger:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .navbar-custom {
+        padding: 0.75rem 1rem !important;
+        gap: 1rem;
+    }
+
+    .navbar-center {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-custom {
+        padding: 0.75rem 1rem !important;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .navbar-left {
+        width: 100%;
+        order: 1;
+    }
+
+    .navbar-center {
+        display: none;
+        order: 3;
+    }
+
+    .navbar-right {
+        width: 100%;
+        order: 2;
+        justify-content: space-between;
+    }
+
+    #userDropdownToggle .text-end {
+        display: none;
+    }
+
+    #userDropdownToggle .rounded-circle {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-custom {
+        padding: 0.5rem 0.75rem !important;
+    }
+
+    .navbar-left .d-flex {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .dropdown-menu {
+        min-width: 200px;
+    }
+}
+
+/* Animaciones */
+.dropdown-menu.show {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Cursor pointer utility */
+.cursor-pointer {
+    cursor: pointer;
+}

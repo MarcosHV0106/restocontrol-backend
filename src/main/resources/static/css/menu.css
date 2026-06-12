@@ -1,0 +1,28 @@
+/* ==========================================
+   MENU PAGE STYLES - RESTOCONTROL
+   ========================================== */
+
+.categoria-inactiva,
+.fila-inactiva {
+    opacity: 0.65;
+    background-color: #f8f8f8 !important;
+}
+
+.categoria-inactiva td {
+    color: #6c757d !important;
+}
+
+.table-hover tbody tr.categoria-inactiva:hover {
+    background-color: #f3f3f3 !important;
+    transform: none !important;
+    cursor: default;
+}
+
+.categoria-inactiva .btn:disabled {
+    cursor: not-allowed;
+}
+
+.categoria-inactiva .btn-estado {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}

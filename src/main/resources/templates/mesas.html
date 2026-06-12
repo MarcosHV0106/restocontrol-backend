@@ -17,34 +17,9 @@
 
 
                 <div class="main-content">
+                    <div th:replace="~{fragments/navbar :: navbar}"></div>
+                    
                     <main class="p-3">
-                        <header  class="d-flex justify-content-between align-items-center
-                                 p-3 bg-white border-bottom shadow-sm mb-4">
-                            <div class="d-flex align-items-center bg-light px-3 py-2 rounded-pill text-muted" style="font-size: 0.85rem;">
-                                <i class="bi bi-calendar3 me-2"></i> Sábado, 16 De Mayo De 2026
-                            </div>
-
-                            <div class="input-group" style="max-width: 350px;">
-                                <span class="input-group-text bg-light border-0 rounded-start-pill text-muted"><i class="bi bi-search"></i></span>
-                                <input type="text" class="form-control bg-light border-0 rounded-end-pill" placeholder="Buscar pedidos, mesas, pr..." style="box-shadow: none;">
-                            </div>
-
-                            <div class="d-flex align-items-center gap-4">
-                                <i class="bi bi-bell position-relative fs-5 text-muted cursor-pointer">
-                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-                                </i>
-                                <div class="d-flex align-items-center gap-2 cursor-pointer">
-                                    <div class="rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: var(--brand-color);">
-                                        <i class="bi bi-person fs-5"></i>
-                                    </div>
-                                    <div class="text-end" style="line-height: 1.2;">
-                                        <div class="fw-bold fs-6">Admin</div>
-                                        <div class="text-muted" style="font-size: 0.75rem;">Administrador</div>
-                                    </div>
-                                    <i class="bi bi-chevron-down ms-1 text-muted" style="font-size: 0.8rem;"></i>
-                                </div>
-                            </div>
-                        </header>
                         <div class="mb-4">
                             <h2 class="fw-bold">Gestión de Mesas</h2>
                             <p class="text-muted mb-0">
