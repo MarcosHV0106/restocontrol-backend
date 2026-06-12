@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo en Desarrollo - RestoControl</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <style>
+        :root {
+            --brand-primary: #df7a48;
+            --brand-secondary: #e67e22;
+            --brand-tertiary: #f39c12;
+            --warm-dark: #2c1a11;
+            --warm-light: #fdfaf6;
+            --light-gray: #f8f6f3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--warm-light);
+            color: var(--warm-dark);
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-container {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            padding: 60px 45px;
+            text-align: center;
+            max-width: 650px;
+            width: 100%;
+            border-top: 5px solid var(--brand-primary);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(223, 122, 72, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .info-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(223, 122, 72, 0.15);
+        }
+
+        .icon-wrapper {
+            width: 110px;
+            height: 110px;
+            background: linear-gradient(135deg, rgba(223, 122, 72, 0.1) 0%, rgba(230, 126, 34, 0.1) 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 30px;
+            color: var(--brand-primary);
+            font-size: 50px;
+            position: relative;
+            z-index: 1;
+            animation: floatIcon 3s ease-in-out infinite;
+            box-shadow: 0 10px 30px rgba(223, 122, 72, 0.2);
+        }
+
+        @keyframes floatIcon {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .info-card h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: var(--warm-dark);
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .info-card p {
+            font-size: 16px;
+            color: #7f8c8d;
+            line-height: 1.8;
+            margin-bottom: 35px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-feature {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-feature i {
+            color: var(--brand-secondary);
+            font-size: 18px;
+        }
+
+        .badge-avance {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 6px 20px rgba(223, 122, 72, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .badge-avance:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(223, 122, 72, 0.4);
+            color: white;
+        }
+
+        .badge-avance i {
+            animation: rocketFly 1.5s ease-in-out infinite;
+        }
+
+        @keyframes rocketFly {
+            0%, 100% {
+                transform: translateX(0) scale(1);
+            }
+            50% {
+                transform: translateX(5px) scale(1.1);
+            }
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 40px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-item {
+            padding: 15px 10px;
+            background: linear-gradient(135deg, rgba(223, 122, 72, 0.05) 0%, rgba(230, 126, 34, 0.05) 100%);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(223, 122, 72, 0.1);
+        }
+
+        .feature-item:hover {
+            background: linear-gradient(135deg, rgba(223, 122, 72, 0.1) 0%, rgba(230, 126, 34, 0.1) 100%);
+            transform: translateY(-3px);
+        }
+
+        .feature-item i {
+            display: block;
+            font-size: 24px;
+            color: var(--brand-primary);
+            margin-bottom: 8px;
+        }
+
+        .feature-item span {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+            display: block;
+        }
+
+        .coming-soon-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 25px;
+            }
+
+            .info-card {
+                padding: 40px 25px;
+                border-radius: 16px;
+            }
+
+            .info-card h1 {
+                font-size: 24px;
+            }
+
+            .icon-wrapper {
+                width: 90px;
+                height: 90px;
+                font-size: 38px;
+                margin: 0 auto 20px;
+            }
+
+            .badge-avance {
+                padding: 10px 20px;
+                font-size: 12px;
+            }
+
+            .features-list {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin: 30px 0;
+            }
+
+            .info-card p {
+                font-size: 14px;
+                margin-bottom: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 15px;
+            }
+
+            .info-card {
+                padding: 30px 18px;
+                max-width: 100%;
+            }
+
+            .info-card h1 {
+                font-size: 20px;
+                margin-bottom: 12px;
+            }
+
+            .icon-wrapper {
+                width: 70px;
+                height: 70px;
+                font-size: 32px;
+                margin: 0 auto 15px;
+            }
+
+            .info-card p {
+                font-size: 13px;
+                margin-bottom: 20px;
+            }
+
+            .features-list {
+                grid-template-columns: 1fr;
+                margin: 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div class="main-content">
+        <div class="main-container">
+            <div class="info-card">
+                <div class="coming-soon-badge">
+                    <i class="bi bi-star-fill me-1"></i> Próximamente
+                </div>
+                <div class="icon-wrapper">
+                    <i class="fa-solid fa-rocket"></i>
+                </div>
+                <h1>Módulo en Desarrollo</h1>
+                <p>Estamos trabajando intensamente para perfeccionar esta funcionalidad y ofrecerte las mejores herramientas de gestión gastronómica.</p>
+
+                <div class="timeline-feature">
+                    <i class="bi bi-hourglass-split"></i>
+                    <span>Estará disponible en breve</span>
+                </div>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="bi bi-lightning-fill"></i>
+                        <span>Rendimiento</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Seguridad</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-sliders"></i>
+                        <span>Personalizable</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-speedometer"></i>
+                        <span>Optimizado</span>
+                    </div>
+                </div>
+
+                <div class="badge-avance">
+                    <i class="fa-solid fa-rocket"></i> Disponible desde el Avance #4
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Añadir animación suave al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.info-card');
+        cards.forEach((card, index) => {
+            card.style.animation = `fadeIn 0.5s ease-in-out ${index * 0.1}s forwards`;
+        });
+    });
+</script>
+</body>
+</html>

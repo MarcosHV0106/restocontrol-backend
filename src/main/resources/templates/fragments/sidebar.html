@@ -16,7 +16,8 @@
     <body>
         <div th:fragment="sidebar">
             <aside class="sidebar d-flex flex-column flex-shrink-0 bg-white border-end vh-100">
-                <a href="/dashboard" class="brand-link d-flex align-items-center text-decoration-none p-4 pb-3 border-bottom">
+                <!-- Brand Link -->
+                <a href="/dashboard" class="brand-link d-flex align-items-center text-decoration-none pb-3 border-bottom">
                     <div class="logo-icon me-3 d-flex align-items-center justify-content-center text-white rounded-circle shadow-sm">
                         <i class="bi bi-shop fs-4"></i>
                     </div>
@@ -26,81 +27,168 @@
                     </div>
                 </a>
 
+                <!-- Información del Usuario -->
+                <div class="user-info-section p-3 border-bottom" id="userInfoSection" style="display: none;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="avatar-small rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 36px; height: 36px; background: linear-gradient(135deg, #df7a48 0%, #e67e22 100%);">
+                            <i class="bi bi-person-fill fs-6"></i>
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div class="fw-bold text-dark" style="font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="userName">Usuario</div>
+                            <small class="text-muted d-block" style="font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="userRole">Rol</small>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block" style="font-size: 0.7rem;">
+                        <i class="bi bi-clock me-1"></i>
+                        <span id="loginTime">--:-- --</span>
+                    </small>
+                </div>
+
+                <!-- Navigation -->
                 <div class="sidebar-nav-container overflow-auto p-3 flex-grow-1">
                     <ul class="nav nav-pills flex-column mb-auto gap-1">
                         <li class="nav-item">
                             <a href="/dashboard" class="nav-link custom-link d-flex align-items-center fw-medium">
-                                <i class="bi bi-grid-1x2 me-3 fs-5"></i> Dashboard
+                                <i class="bi bi-grid-1x2 me-3 fs-5"></i>
+                                <span>Dashboard</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/menu" class="nav-link custom-link d-flex align-items-center fw-medium">
-                                <i class="bi bi-tags me-3 fs-5"></i> Menú y Categorías
+                                <i class="bi bi-tags me-3 fs-5"></i>
+                                <span>Menú y Categorías</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/pedidos" class="nav-link custom-link d-flex align-items-center fw-medium">
-                                <i class="bi bi-receipt me-3 fs-5"></i> Pedidos
+                                <i class="bi bi-receipt me-3 fs-5"></i>
+                                <span>Pedidos</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/usuarios-roles" class="nav-link custom-link d-flex align-items-center fw-medium">
-                                <i class="bi bi-people me-3 fs-5"></i> Usuarios y Roles
+                                <i class="bi bi-people me-3 fs-5"></i>
+                                <span>Usuarios y Roles</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/mesas" class="nav-link custom-link d-flex align-items-center fw-medium">
-                                <!-- Se agregaron las clases me-3 y fs-5 aquí -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fork-knife me-3 fs-5" viewBox="0 0 16 16">
                                     <path d="M13 .5c0-.276-.226-.506-.498-.465-1.703.257-2.94 2.012-3 8.462a.5.5 0 0 0 .498.5c.56.01 1 .13 1 1.003v5.5a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5zM4.25 0a.25.25 0 0 1 .25.25v5.122a.128.128 0 0 0 .256.006l.233-5.14A.25.25 0 0 1 5.24 0h.522a.25.25 0 0 1 .25.238l.233 5.14a.128.128 0 0 0 .256-.006V.25A.25.25 0 0 1 6.75 0h.29a.5.5 0 0 1 .498.458l.423 5.07a1.69 1.69 0 0 1-1.059 1.711l-.053.022a.92.92 0 0 0-.58.884L6.47 15a.971.971 0 1 1-1.942 0l.202-6.855a.92.92 0 0 0-.58-.884l-.053-.022a1.69 1.69 0 0 1-1.059-1.712L3.462.458A.5.5 0 0 1 3.96 0z"/>
-                                </svg> Gestion de Mesas
+                                </svg>
+                                <span>Gestion de Mesas</span>
                             </a>
                         </li>
                         <li class="nav-item mt-4">
                             <a href="/configuracion" class="nav-link custom-link d-flex align-items-center fw-medium">
-                                <i class="bi bi-gear me-3 fs-5"></i> Configuración
+                                <i class="bi bi-gear me-3 fs-5"></i>
+                                <span>Configuración</span>
                             </a>
                         </li>
                     </ul>
                 </div>
 
+                <!-- Version Box -->
                 <div class="p-3 border-top">
-
-                    <button
-                            id="btnLogout"
-                            class="btn btn-outline-danger w-100">
-
-                        <i class="bi bi-box-arrow-right me-2"></i>
-                        Cerrar Sesión
-
-                    </button>
-
-                </div>
-
-                <div class="p-3 mt-auto border-top">
                     <div class="version-box p-3 rounded-3 text-center">
                         <div class="text-muted" style="font-size:0.75rem;">Versión del Sistema</div>
                         <div class="fw-bold text-dark" style="font-size:0.85rem;">v1.0.0</div>
                     </div>
                 </div>
+
+                <!-- Logout Button -->
+                <div class="p-3 border-top">
+                    <button
+                            id="btnLogout"
+                            class="btn btn-outline-danger w-100">
+                        <i class="bi bi-box-arrow-right me-2"></i>
+                        <span>Cerrar Sesión</span>
+                    </button>
+                </div>
             </aside>
         </div>
 
-
         <script>
+            // Cargar información del usuario desde localStorage
+            function cargarInfoUsuario() {
+                try {
+                    const usuarioJSON = localStorage.getItem("usuario");
+                    if (usuarioJSON) {
+                        const usuario = JSON.parse(usuarioJSON);
+                        const userSection = document.getElementById("userInfoSection");
+                        const userName = document.getElementById("userName");
+                        const userRole = document.getElementById("userRole");
+                        const loginTime = document.getElementById("loginTime");
 
-            function cerrarSesion(){
+                        // Establecer nombre del usuario
+                        if (usuario.nombre) {
+                            userName.textContent = usuario.nombre;
+                        } else if (usuario.correo) {
+                            userName.textContent = usuario.correo.split('@')[0];
+                        }
 
-                if(!confirm("¿Desea cerrar sesión?")){
+                        // Establecer rol del usuario
+                        if (usuario.rol) {
+                            userRole.textContent = usuario.rol;
+                        }
+
+                        // Mostrar hora de inicio de sesión
+                        const loginDateTime = localStorage.getItem("loginDateTime");
+                        if (loginDateTime) {
+                            const date = new Date(loginDateTime);
+                            loginTime.textContent = date.toLocaleTimeString('es-ES', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                            });
+                        } else {
+                            const now = new Date();
+                            loginTime.textContent = now.toLocaleTimeString('es-ES', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                            });
+                        }
+
+                        // Mostrar la sección
+                        userSection.style.display = 'block';
+                    }
+                } catch (e) {
+                    console.error("Error al cargar info del usuario:", e);
+                }
+            }
+
+            function cerrarSesion() {
+                if (!confirm("¿Desea cerrar sesión?")) {
                     return;
                 }
 
                 localStorage.removeItem("usuario");
+                localStorage.removeItem("loginDateTime");
+                localStorage.removeItem("loginEmailHistory");
 
-                window.location.href="/login";
-
+                window.location.href = "/login";
             }
 
+            // Event listener para botón de logout
+            document.getElementById("btnLogout").addEventListener("click", cerrarSesion);
+
+            // Cargar información al inicio
+            cargarInfoUsuario();
+
+            // Actualizar hora cada minuto
+            setInterval(() => {
+                const loginTime = document.getElementById("loginTime");
+                const loginDateTime = localStorage.getItem("loginDateTime");
+                if (loginDateTime) {
+                    const date = new Date(loginDateTime);
+                    loginTime.textContent = date.toLocaleTimeString('es-ES', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                }
+            }, 60000);
         </script>
     </body>
 </html>

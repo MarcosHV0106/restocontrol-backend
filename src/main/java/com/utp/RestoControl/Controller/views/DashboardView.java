@@ -12,7 +12,7 @@ public class DashboardView {
 
     @GetMapping("/dashboard")
     public String dashboard() {
-        return "dashboard";
+        return "disponible";
     }
 
 }
