@@ -11,7 +11,10 @@ createApp({
             categoriaSeleccionada: null,
 
             pedido: [],
-            fechaActual: ""
+            fechaActual: "",
+
+            idMesa: null,
+            clientes: 0,
 
         };
     },
@@ -94,6 +97,80 @@ createApp({
 
         },
 
+        async confirmarPedido() {
+
+            if (this.pedido.length === 0) {
+
+                alert("Debe agregar al menos un producto.");
+
+                return;
+
+            }
+
+            try {
+
+                const pedidoRequest = {
+
+                    idMesa: this.idMesa,
+                    idUsuario: 1,
+                    idModalidadPedido: 1,
+                    idEstadoPedido: 1,
+
+                    observacion: "",
+
+                    detalles: this.pedido.map(item => ({
+
+                            idAlimento: item.idAlimento,
+                            cantidad: item.cantidad
+
+                        }))
+
+                };
+
+                const response = await fetch(
+                        "/api/pedidos",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify(
+                                    pedidoRequest
+                                    )
+                        }
+                );
+
+                if (!response.ok) {
+
+                    const error =
+                            await response.json();
+
+                    throw new Error(
+                            error.mensaje || "Error al registrar pedido"
+                            );
+
+                }
+
+                const resultado =
+                        await response.json();
+
+                alert("Pedido registrado correctamente");
+
+                this.pedido = [];
+
+                console.log(resultado);
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(error.message);
+
+            }
+
+        },
         seleccionarCategoria(idCategoria) {
 
             this.categoriaSeleccionada = idCategoria;
@@ -155,13 +232,31 @@ createApp({
     },
 
     mounted() {
-        const app = document.getElementById("app");
+
+        const params =
+                new URLSearchParams(
+                        window.location.search
+                        );
 
         this.idMesa =
-                app.dataset.idMesa;
+                Number(
+                        params.get("idMesa")
+                        );
 
-        this.personas =
-                app.dataset.personas;
+        this.clientes =
+                Number(
+                        params.get("personas")
+                        );
+
+        if (!this.idMesa) {
+
+            alert("No se ha seleccionado una mesa.");
+
+            return;
+
+        }
+
+
 
         this.obtenerFechaActual();
         this.cargarCategorias();

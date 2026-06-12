@@ -99,6 +99,17 @@ public class PedidoService {
         for (DetallePedidoRequest detalleRequest
                 : request.getDetalles()) {
 
+            Preconditions.checkArgument(
+                    detalleRequest.getCantidad() != null
+                    && detalleRequest.getCantidad() > 0,
+                    "La cantidad debe ser mayor a cero."
+            );
+
+            Preconditions.checkArgument(
+                    detalleRequest.getIdAlimento() != null,
+                    "El alimento es obligatorio."
+            );
+
             Alimento alimento
                     = alimentoService.buscarPorId(
                             detalleRequest.getIdAlimento()
@@ -155,8 +166,12 @@ public class PedidoService {
                 totalPedido
         );
 
-        return pedidoRepository.save(
-                pedido
-        );
+        pedido = pedidoRepository.save(pedido);
+
+        mesa.setEstadoMesa("ocupada");
+
+        mesaService.actualizarEstado(mesa.getIdMesa(),"ocupada");
+
+        return pedido;
     }
 }

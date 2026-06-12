@@ -107,6 +107,19 @@ public class MesaService {
         repository.save(mesa);
     }
 
+    @Transactional
+    public void actualizarEstado(
+            Integer idMesa,
+            String estado) {
+
+        Mesa mesa = buscarPorId(idMesa);
+
+        mesa.setEstadoMesa(estado);
+
+        repository.save(mesa);
+
+    }
+
     private void validarMesa(
             MesaRequest mesa,
             Integer idActual) {
