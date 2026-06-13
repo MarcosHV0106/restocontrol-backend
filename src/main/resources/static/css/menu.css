@@ -31,7 +31,7 @@
   display: none;
 }
 
-/* Esto asegura que la página ocupe todo el alto disponible */
+
 html, body {
     height: 100%;
     margin: 0;

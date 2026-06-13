@@ -33,7 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Buscar usuario por correo usando el método existente en el Repository
+
         Usuario usuario = usuarioRepository.findByCorreoIgnoreCaseAndEliminadoFalse(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
