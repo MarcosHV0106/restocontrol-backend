@@ -32,15 +32,12 @@ public class DataInitializer {
     public CommandLineRunner initData() {
         return args -> {
             try {
-                // Obtener todos los usuarios
                 var usuarios = usuarioRepository.findByEliminadoFalse();
                 
                 boolean hayActualizaciones = false;
                 
-                // Verificar si las contraseñas necesitan ser hasheadas
                 for (Usuario usuario : usuarios) {
                     if (usuario.getClave() != null && !esHashBCrypt(usuario.getClave())) {
-                        System.out.println("Hasheando contraseña para usuario: " + usuario.getCorreo());
                         usuario.setClave(passwordEncoder.encode(usuario.getClave()));
                         usuarioRepository.save(usuario);
                         hayActualizaciones = true;
@@ -60,13 +57,6 @@ public class DataInitializer {
         };
     }
 
-    /**
-     * Verificar si una contraseña está en formato BCrypt
-     * Las contraseñas BCrypt comienzan con $2a$, $2b$ o $2y$
-     * 
-     * @param hash Hash a verificar
-     * @return true si es BCrypt, false en caso contrario
-     */
     private boolean esHashBCrypt(String hash) {
         if (hash == null || hash.length() < 4) {
             return false;
