@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.utp.RestoControl.Dto.DetallePedidoRequest;
 import com.utp.RestoControl.Dto.PedidoRequest;
 import com.utp.RestoControl.Entity.*;
+import com.utp.RestoControl.Exception.ResourceNotFoundException;
 
 import com.utp.RestoControl.Repository.DetallePedidoRepository;
 import com.utp.RestoControl.Repository.PedidoRepository;
@@ -185,14 +186,47 @@ public class PedidoService {
     }
 
     @Transactional(readOnly = true)
-    public Pedido buscarUltimoPorMesa(
-            Integer idMesa) {
+    public Pedido buscarUltimoPorMesa(Integer idMesa) {
+
+        Mesa mesa = mesaService.buscarPorId(idMesa);
+
+        if ("libre".equalsIgnoreCase(mesa.getEstadoMesa())) {
+            return null;
+        }
 
         return pedidoRepository
-                .findTopByIdMesa_IdMesaAndEliminadoFalseOrderByIdPedidoDesc(
-                        idMesa
+                .findTopByIdMesa_IdMesaAndEstadoPedido_IdEstadoPedidoNotOrderByIdPedidoDesc(
+                        idMesa,
+                        4
                 )
                 .orElse(null);
+    }
 
+    @Transactional
+    public Pedido cobrar(Integer idPedido) {
+
+        Pedido pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(()
+                        -> new ResourceNotFoundException(
+                        "Pedido no encontrado."
+                )
+                );
+
+        EstadoPedido estadoPagado
+                = estadoPedidoService.buscarPorId(4);
+
+        pedido.setEstadoPedido(
+                estadoPagado
+        );
+
+        Mesa mesa = pedido.getIdMesa();
+
+        mesa.setEstadoMesa(
+                "libre"
+        );
+
+        return pedidoRepository.save(
+                pedido
+        );
     }
 }

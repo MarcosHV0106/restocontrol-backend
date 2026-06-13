@@ -19,7 +19,7 @@
                 <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
                 <div class="main-content">
-                     <div th:replace="~{fragments/navbar :: navbar}"></div>
+                    <div th:replace="~{fragments/navbar :: navbar}"></div>
                     <main class="p-3">
                         <div class="mb-4">
                             <h2 class="fw-bold">Gestión de Mesas</h2>
@@ -197,6 +197,17 @@
                                         <div class="col-md-2">
 
                                             <button class="btn btn-mesa w-100"
+                                                    @click="nuevo">
+
+                                                Nuevo
+
+                                            </button>
+
+                                        </div>
+
+                                        <div class="col-md-2">
+
+                                            <button class="btn btn-mesa w-100"
                                                     @click="listar">
 
                                                 Actualizar
@@ -204,6 +215,7 @@
                                             </button>
 
                                         </div>
+
 
                                     </div>
 
@@ -235,16 +247,14 @@
                                             <span class="estado-dot reservada"></span>
                                             <span>Reservada</span>
                                         </div>
-                                        <p class="text-end">
-                                            <button class="btn btn-primary" @click="nuevo">Nuevo</button>
-                                        </p>
+
                                     </div>
 
                                 </div>
                             </div>
 
                             <div class="modal" tabindex="-1" id="mdlEntidad">
-                                <div class="modal-dialog">
+                                <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title">Editar</h5>
@@ -464,22 +474,54 @@
                                             </div>
                                             <hr>
 
-                                            <button class="btn btn-mesa w-100 mb-2"
-                                                    :disabled="mesaSeleccionada.estadoMesa != 'libre'"
-                                                    @click="abrirModalApertura">
+                                            <button
+                                                v-if="mesaSeleccionada?.estadoMesa === 'libre'"
+                                                class="btn btn-mesa w-100 mb-2"
+                                                @click="abrirModalApertura">
 
                                                 + Apertura de Mesa
 
                                             </button>
 
-                                            <button class="btn btn-outline-secondary w-100"
-                                                    :disabled="mesaSeleccionada.estadoMesa != 'libre'"
-                                                    @click="abrirModalUnion">
+                                            <button
+                                                v-if="mesaSeleccionada?.estadoMesa === 'ocupada'"
+                                                class="btn btn-success w-100 mb-2"
+                                                @click="cobrarPedido">
+
+                                                Cobrar
+
+                                            </button>
+
+                                            <button
+                                                class="btn btn-outline-secondary w-100"
+                                                :disabled="
+                                                mesaSeleccionada.estadoMesa !== 'libre' &&
+                                                mesaSeleccionada.estadoMesa !== 'reservada'
+                                                "
+                                                @click="abrirModalUnion">
 
                                                 Unir Mesas
 
                                             </button>
-                                            <button class="btn btn-primary" @click="editar(mesaSeleccionada.idMesa)">Editar</button>
+
+                                            <button
+                                                v-if="mesaSeleccionada?.estadoMesa === 'libre'"
+                                                class="btn btn-primary w-100 mb-2"
+                                                @click="editar(mesaSeleccionada.idMesa)">
+
+                                                Editar Mesa
+
+                                            </button>
+
+
+
+                                            <button
+                                                v-if="mesaSeleccionada?.estadoMesa === 'ocupada'"
+                                                class="btn btn-mesa w-100 mb-2">
+
+                                                Editar Pedido
+
+                                            </button>
                                         </div>
 
                                     </div>
@@ -510,7 +552,8 @@
                                     <!-- Pedido actual -->
                                     <div
                                         v-if="!mesaSeleccionada"
-                                        class="card shadow-sm">
+                                        class="card shadow-sm"
+                                        >
 
                                         <div class="card-body text-center text-muted">
 
@@ -574,131 +617,7 @@
 
                                     </div>
 
-                                    <div class="modal fade"
-                                         id="mdlAperturaMesa"
-                                         tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">
-                                                        Apertura de Mesa
-                                                        {{ mesaSeleccionada ? mesaSeleccionada.numeroMesa : '' }}
-                                                    </h5>
-                                                    <button type="button"
-                                                            class="btn-close"
-                                                            data-bs-dismiss="modal">
-                                                    </button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <label class="form-label">
-                                                        Ingrese el número de personas
-                                                    </label>
-                                                    <input type="number"
-                                                           min="1"
-                                                           class="form-control"
-                                                           v-model="cantidadPersonas">
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button"
-                                                            class="btn btn-secondary"
-                                                            data-bs-dismiss="modal">
-                                                        Cancelar
-                                                    </button>
-                                                    <button type="button"
-                                                            class="btn btn-primary"
-                                                            @click="confirmarAperturaMesa">
-                                                        Confirmar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal fade"
-                                         id="mdlUnirMesas"
-                                         tabindex="-1">
 
-                                        <div class="modal-dialog">
-
-                                            <div class="modal-content">
-
-                                                <div class="modal-header">
-
-                                                    <h5 class="modal-title">
-
-                                                        Unir Mesa
-                                                        {{ mesaSeleccionada ? mesaSeleccionada.numeroMesa : '' }}
-                                                        con...
-
-                                                    </h5>
-
-
-                                                    <button type="button"
-                                                            class="btn-close"
-                                                            data-bs-dismiss="modal">
-                                                    </button>
-
-                                                </div>
-
-                                                <p></p>
-                                                <h6>    Selecciona las mesas a unir</h6>
-
-                                                <div class="modal-body">
-
-                                                    <div class="row">
-
-                                                        <div class="col-md-4 mb-3"
-                                                             v-for="mesa in mesasParaUnir">
-
-                                                            <input
-                                                                type="checkbox"
-                                                                class="btn-check"
-                                                                :id="'mesa'+mesa.idMesa"
-                                                                :value="mesa.idMesa"
-                                                                v-model="mesasSeleccionadasUnir">
-
-                                                            <label
-                                                                class="mesa-union w-100"
-                                                                :class="{
-                                                                'mesa-union-seleccionada':
-                                                                mesasSeleccionadasUnir.includes(mesa.idMesa)
-                                                                }"
-                                                                :for="'mesa'+mesa.idMesa">
-
-                                                                Mesa {{mesa.numeroMesa}}
-
-                                                            </label>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                </div>
-
-                                                <div class="modal-footer justify-content-center">
-
-                                                    <button
-                                                        class="btn btn-cancelar-union w-30"
-                                                        data-bs-dismiss="modal">
-
-                                                        Cancelar
-
-                                                    </button>
-
-                                                    <button
-                                                        class="btn btn-mesa w-30"
-                                                        @click="confirmarUnionMesas">
-
-                                                        Confirmar
-
-                                                    </button>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
                                 </div>
 
                             </div>
@@ -707,7 +626,136 @@
 
                 </div>
             </div>
+            <div class="modal fade"
+                 id="mdlAperturaMesa"
+                 tabindex="-1"
+                 v-if="mesaSeleccionada">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                Apertura de Mesa
+                                {{ mesaSeleccionada ? mesaSeleccionada.numeroMesa : '' }}
+                            </h5>
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <label class="form-label">
+                                Ingrese el número de personas
+                            </label>
+                            <input type="number"
+                                   min="1"
+                                   :max="mesaSeleccionada.capacidad"
+                                   class="form-control"
+                                   v-model="cantidadPersonas">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    @click="confirmarAperturaMesa">
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade"
+                 id="mdlUnirMesas"
+                 tabindex="-1">
+
+                <div class="modal-dialog modal-dialog-centered">
+
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+
+                            <h5 class="modal-title">
+
+                                Unir Mesa
+                                {{ mesaSeleccionada ? mesaSeleccionada.numeroMesa : '' }}
+                                con...
+
+                            </h5>
+
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
+                            </button>
+
+                        </div>
+
+                        <p></p>
+                        <h6>    Selecciona las mesas a unir</h6>
+
+                        <div class="modal-body">
+
+                            <div class="row">
+
+                                <div class="col-md-4 mb-3"
+                                     v-for="mesa in mesasParaUnir">
+
+                                    <input
+                                        type="checkbox"
+                                        class="btn-check"
+                                        :id="'mesa'+mesa.idMesa"
+                                        :value="mesa.idMesa"
+                                        v-model="mesasSeleccionadasUnir">
+
+                                    <label
+                                        class="mesa-union w-100"
+                                        :class="{
+                                        'mesa-union-seleccionada':
+                                        mesasSeleccionadasUnir.includes(mesa.idMesa)
+                                        }"
+                                        :for="'mesa'+mesa.idMesa">
+
+                                        Mesa {{mesa.numeroMesa}}
+
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer justify-content-center">
+
+                            <button
+                                class="btn btn-cancelar-union w-30"
+                                data-bs-dismiss="modal">
+
+                                Cancelar
+
+                            </button>
+
+                            <button
+                                class="btn btn-mesa w-30"
+                                @click="confirmarUnionMesas">
+
+                                Confirmar
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
         </div>
+
+
     </main>
 
 

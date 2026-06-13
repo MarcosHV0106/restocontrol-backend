@@ -16,5 +16,9 @@ public interface PedidoRepository
     Optional<Pedido> findTopByIdMesa_IdMesaAndEliminadoFalseOrderByIdPedidoDesc(
             Integer idMesa
     );
+    Optional<Pedido> findTopByIdMesa_IdMesaAndEstadoPedido_IdEstadoPedidoNotOrderByIdPedidoDesc(
+        Integer idMesa,
+        Integer idEstadoPedido
+);
 
 }

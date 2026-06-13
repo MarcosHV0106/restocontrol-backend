@@ -316,13 +316,24 @@ createApp({
 
         confirmarAperturaMesa() {
 
-            const idMesa = this.mesaSeleccionada.idMesa;
-            const personas = this.cantidadPersonas;
+    if (
+        this.cantidadPersonas < 1 ||
+        this.cantidadPersonas > this.mesaSeleccionada.capacidad
+    ) {
 
-            window.location.href =
-                    `/pedidos?idMesa=${idMesa}&personas=${personas}`;
+        alert(
+            `La mesa solo admite ${this.mesaSeleccionada.capacidad} personas`
+        );
 
-        },
+        return;
+    }
+
+    const idMesa = this.mesaSeleccionada.idMesa;
+    const personas = this.cantidadPersonas;
+
+    window.location.href =
+        `/pedidos?idMesa=${idMesa}&personas=${personas}`;
+},
 
         abrirModalUnion() {
 
@@ -354,7 +365,42 @@ createApp({
                     this.mesasSeleccionadasUnir
                     );
 
+        },
+        async cobrarPedido() {
+
+            try {
+
+                const idPedido =
+                        this.mesaSeleccionada.pedido.idPedido;
+
+                const response =
+                        await fetch(
+                                `/api/pedidos/${idPedido}/cobrar`,
+                                {
+                                    method: "PUT"
+                                }
+                        );
+
+                if (!response.ok) {
+                    throw new Error();
+                }
+
+                alert("Pedido cobrado correctamente");
+
+                await this.listar();
+
+                this.mesaSeleccionada = null;
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert("No se pudo cobrar el pedido");
+
+            }
+
         }
+
 
     },
 
