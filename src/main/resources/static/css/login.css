@@ -11,6 +11,10 @@
     --border-light: #e8e0d7;
 }
 
+[v-cloak] {
+  display: none;
+}
+
 * {
     margin: 0;
     padding: 0;

@@ -25,41 +25,45 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private UsuarioRepository usuarioRepository;
 
     /**
-     * Carga un usuario por su nombre de usuario (correo en este caso)
+     * Carga un usuario por su correo (nombre de usuario en Spring Security)
      * 
      * @param username El correo del usuario
      * @return UserDetails del usuario
-     * @throws UsernameNotFoundException Si el usuario no es encontrado
+     * @throws UsernameNotFoundException Si el usuario no es encontrado o está inactivo
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Buscar usuario por correo (usamos correo como nombre de usuario)
-        Usuario usuario = usuarioRepository.findByCorreo(username)
+        // Buscar usuario por correo usando el método existente en el Repository
+        Usuario usuario = usuarioRepository.findByCorreoIgnoreCaseAndEliminadoFalse(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        // Verificar que el usuario esté activo
-        if (!usuario.getActivo()) {
-            throw new UsernameNotFoundException("Usuario inactivo: " + username);
+            System.out.println("Encontrado: " + usuario.getCorreo());
+            System.out.println("Disponible: " + usuario.getDisponible());
+            System.out.println("Hash: " + usuario.getClave());
+
+        // Verificar que el usuario esté disponible/activo
+        if (!usuario.getDisponible()) {
+            throw new UsernameNotFoundException("Usuario inactivo o no disponible: " + username);
         }
 
         // Construir las autoridades (roles)
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         if (usuario.getRol() != null) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombreRol().toUpperCase()));
+            // Agregar el rol del usuario con prefijo ROLE_
+            String roleName = usuario.getRol().getNombreRol().toUpperCase().trim();
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + roleName));
         } else {
             // Rol por defecto si no tiene rol asignado
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         }
 
         // Crear y retornar el UserDetails
+        // Nota: Los métodos accountNonExpired(), accountNonLocked(), credentialsNonExpired(), disabled()
+        // han sido removidos en Spring Security 6.x. Solo usamos username, password y authorities.
         return User.builder()
                 .username(usuario.getCorreo())
                 .password(usuario.getClave())
                 .authorities(authorities)
-                .accountNonExpired(true)
-                .accountNonLocked(true)
-                .credentialsNonExpired(true)
-                .disabled(!usuario.getActivo())
                 .build();
     }
 }

@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-    <head th:replace="~{fragments/sidebar :: head('Dashboard - RestoControl')}">
-
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pedidos - Restaurante</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+        <link th:href="@{/css/pedidos.css}" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     </head>
 
     <body>
@@ -16,6 +22,7 @@
                 <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
                 <div class="main-content">
+                    <div th:replace="~{fragments/navbar :: navbar}"></div>
                     <main class="p-4 p-md-5">
 
                         <h2 class="mb-4">Toma de Pedido</h2>
@@ -291,5 +298,6 @@
         <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <script th:src="@{/js/pedido.js}"></script>
         <script th:src="@{/js/logout.js}"></script>
+        <script th:src="@{/js/navbar.js}"></script>
     </body>
 </html>

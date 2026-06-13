@@ -12,6 +12,8 @@
     --border-color: #e8dfd6;
 }
 
+
+
 body {
     background-color: var(--brand-bg-light);
     margin: 0;
@@ -141,6 +143,10 @@ body {
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(211, 107, 70, 0.1), transparent);
     transition: left 0.5s ease;
+}
+
+[v-cloak] {
+  display: none;
 }
 
 .custom-link:hover {

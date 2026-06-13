@@ -11,6 +11,8 @@
     --border-light: #e8e0d7;
 }
 
+
+
 /* Navbar Container */
 .navbar-custom {
     background-color: white !important;
@@ -18,6 +20,10 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     padding: 1rem 2rem !important;
     gap: 2rem;
+}
+
+[v-cloak] {
+  display: none;
 }
 
 /* Left Section - Date */

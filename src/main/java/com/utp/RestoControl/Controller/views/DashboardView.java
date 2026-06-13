@@ -4,6 +4,7 @@
  */
 package com.utp.RestoControl.Controller.views;
 
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -11,8 +12,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class DashboardView {
 
     @GetMapping("/dashboard")
-    public String dashboard() {
+    public String dashboard(Authentication authentication) {
+
+        System.out.println("AUTH = " + authentication);
+
         return "disponible";
     }
-
+    
 }

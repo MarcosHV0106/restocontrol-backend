@@ -17,6 +17,8 @@ import com.utp.RestoControl.Repository.UsuarioRepository;
 import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,9 @@ public class UsuarioService {
     
     private final UsuarioRepository repository;
     private final RolRepository rolRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     
     @Transactional(readOnly = true)
     public List<Usuario> listar(){
@@ -47,7 +52,9 @@ public class UsuarioService {
         usuario.setNombre(normalizarObligatorio(request.getNombre(), "El nombre del usuario es obligatorio."));
         usuario.setApellido(normalizarObligatorio(request.getApellido(), "El apellido del usuario es obligatorio."));
         usuario.setCorreo(normalizarCorreo(request.getCorreo()));
-        usuario.setClave(normalizarObligatorio(request.getClave(), "La clave del usuario es obligatoria."));
+        // Hashear la contraseña al guardar
+        usuario.setClave(passwordEncoder.encode(
+                normalizarObligatorio(request.getClave(), "La clave del usuario es obligatoria.")));
         usuario.setRol(buscarRolActivo(obtenerIdRol(request)));
         usuario.setDisponible(true);
         usuario.setEliminado(false);
@@ -67,7 +74,8 @@ public class UsuarioService {
 
         String clave = request.getClave() == null ? null : request.getClave().trim();
         if (!Strings.isNullOrEmpty(clave)) {
-            usuario.setClave(clave);
+            // Hashear la contraseña al actualizar
+            usuario.setClave(passwordEncoder.encode(clave));
         }
 
         return repository.save(usuario);
@@ -91,7 +99,8 @@ public class UsuarioService {
             throw new InvalidCredentialsException("El rol del usuario esta inactivo.");
         }
 
-        if (!Objects.equal(usuario.getClave(), request.getClave().trim())) {
+        // Usar passwordEncoder para verificar la contraseña
+        if (!passwordEncoder.matches(request.getClave().trim(), usuario.getClave())) {
             throw new InvalidCredentialsException("Credenciales invalidas.");
         }
 
@@ -152,5 +161,49 @@ public class UsuarioService {
         String normalizado = valor == null ? null : valor.trim();
         Preconditions.checkArgument(!Strings.isNullOrEmpty(normalizado), mensaje);
         return normalizado;
+    }
+
+    /**
+     * Cambiar la contraseña de un usuario
+     * 
+     * @param idUsuario ID del usuario
+     * @param claveActual Contraseña actual (sin hashear)
+     * @param claveNueva Nueva contraseña (sin hashear)
+     */
+    @Transactional
+    public void cambiarContrasena(Integer idUsuario, String claveActual, String claveNueva) {
+        Usuario usuario = buscarPorId(idUsuario);
+        
+        // Validar contraseña actual
+        if (!passwordEncoder.matches(claveActual, usuario.getClave())) {
+            throw new InvalidCredentialsException("La contraseña actual es incorrecta.");
+        }
+        
+        // Validar nueva contraseña
+        String claveValidada = normalizarObligatorio(claveNueva, "La nueva contraseña es obligatoria.");
+        Preconditions.checkArgument(claveValidada.length() >= 6, "La nueva contraseña debe tener al menos 6 caracteres.");
+        
+        // Actualizar contraseña
+        usuario.setClave(passwordEncoder.encode(claveValidada));
+        repository.save(usuario);
+    }
+
+    /**
+     * Resetear la contraseña de un usuario (solo para administradores)
+     * 
+     * @param idUsuario ID del usuario
+     * @param claveNueva Nueva contraseña (sin hashear)
+     */
+    @Transactional
+    public void resetearContrasena(Integer idUsuario, String claveNueva) {
+        Usuario usuario = buscarPorId(idUsuario);
+        
+        // Validar nueva contraseña
+        String claveValidada = normalizarObligatorio(claveNueva, "La nueva contraseña es obligatoria.");
+        Preconditions.checkArgument(claveValidada.length() >= 6, "La nueva contraseña debe tener al menos 6 caracteres.");
+        
+        // Actualizar contraseña
+        usuario.setClave(passwordEncoder.encode(claveValidada));
+        repository.save(usuario);
     }
 }

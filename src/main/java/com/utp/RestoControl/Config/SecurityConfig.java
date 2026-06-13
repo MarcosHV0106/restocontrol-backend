@@ -41,18 +41,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // Desabilitar CSRF para peticiones POST (se puede mejorar luego)
+                .csrf(csrf -> csrf.disable())
+                
                 // Autorización de solicitudes
                 .authorizeHttpRequests(authorize -> authorize
                         // Rutas públicas - accesibles sin autenticación
-                        .requestMatchers("/login", "/registro", "/api/auth/**").permitAll()
+                        .requestMatchers("/login", "/registro").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/logout", "/api/auth/verify").permitAll()
                         .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error", "/error/**").permitAll()
                         
                         // Rutas protegidas - requieren autenticación
-                        .requestMatchers("/dashboard", "/menu", "/pedidos", "/mesas").authenticated()
+                        .requestMatchers("/dashboard", "/menu", "/pedidos", "/mesas", "/configuracion").authenticated()
                         
                         // Rutas administrativas - requieren rol ADMIN
-                        .requestMatchers("/usuarios-roles", "/configuracion", "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/usuarios-roles").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/usuarios/**", "/api/roles/**").hasRole("ADMIN")
                         
                         // Rutas de gestión de pedidos - MESERO, ADMIN, COCINA
@@ -74,13 +79,14 @@ public class SecurityConfig {
                         .usernameParameter("correo")
                         .passwordParameter("clave")
                         .defaultSuccessUrl("/dashboard", true)
+                        .failureUrl("/login?error=true")
                         .permitAll()
                 )
                 
                 // Configuración del logout
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
+                        .logoutSuccessUrl("/login?logout=true")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .permitAll()
@@ -88,30 +94,24 @@ public class SecurityConfig {
                 
                 // Configuración de sesiones
                 .sessionManagement(session -> session
-                        .sessionFixationProtection()
+                        .sessionFixation(fixation -> fixation.migrateSession())
                         .maximumSessions(1)
-                        .expiredUrl("/login")
                 )
                 
                 // CORS
                 .cors(cors -> cors.configurationSource(request -> {
                     org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
-                    config.setAllowedOrigins(java.util.List.of("http://localhost:8080"));
+                    config.setAllowedOrigins(java.util.List.of("http://localhost:8080", "http://localhost:3000"));
                     config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(java.util.List.of("*"));
                     config.setAllowCredentials(true);
                     return config;
                 }))
                 
-                // CSRF - deshabilitado por ahora para testing con API REST
-                .csrf(csrf -> csrf.disable())
-                
                 // Headers de seguridad
                 .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions.deny())
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin())
                         .xssProtection()
-                        .and()
-                        .contentSecurityPolicy("default-src 'self'")
                 );
 
         return http.build();

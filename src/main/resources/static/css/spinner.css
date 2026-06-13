@@ -21,6 +21,10 @@
     padding: 2rem;
 }
 
+[v-cloak] {
+  display: none;
+}
+
 .loading-container.full-height {
     min-height: 100vh;
 }

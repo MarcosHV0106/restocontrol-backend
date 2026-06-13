@@ -9,6 +9,7 @@
 
 }
 
+
 .mesa-status-bar{
     height:8px;
     width:100%;
@@ -28,6 +29,10 @@
 
 .mesa-cobrar .mesa-status-bar{
     background:#f59e0b;
+}
+
+[v-cloak] {
+  display: none;
 }
 
 .mesa-icon{

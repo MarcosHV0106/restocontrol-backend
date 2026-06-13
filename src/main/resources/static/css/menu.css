@@ -26,3 +26,29 @@
     opacity: 1 !important;
     pointer-events: auto !important;
 }
+
+[v-cloak] {
+  display: none;
+}
+
+/* Esto asegura que la página ocupe todo el alto disponible */
+html, body {
+    height: 100%;
+    margin: 0;
+            background-color: var(--brand-bg-light);
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--warm-light);
+            color: var(--warm-dark);
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh; /* El contenedor padre debe medir al menos el 100% del viewport */
+}
+
+.main-content {
+    flex: 1; /* Esto obliga al contenido a ocupar el espacio restante al lado del sidebar */
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden; /* Evita scrolls horizontales innecesarios */
+}
