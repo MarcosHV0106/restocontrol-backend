@@ -8,13 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-/**
- * Inicializador de datos para RestoControl
- * 
- * Se ejecuta al iniciar la aplicación para:
- * - Hashear contraseñas de usuarios si aún no están hasheadas
- * - Inicializar datos de prueba (si es necesario)
- */
 @Configuration
 public class DataInitializer {
 
@@ -24,10 +17,6 @@ public class DataInitializer {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /**
-     * Bean que se ejecuta al iniciar la aplicación
-     * Verifica y hashea las contraseñas de los usuarios
-     */
     @Bean
     public CommandLineRunner initData() {
         return args -> {

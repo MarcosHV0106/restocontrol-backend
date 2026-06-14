@@ -12,7 +12,6 @@
     <div class="login-page">
         <div class="login-container">
 
-            <!-- Formulario de login -->
             <div class="login-card">
                 <div class="card-header">
                     <div class="logo-wrapper">
@@ -23,7 +22,6 @@
                 </div>
 
                 <form @submit.prevent="iniciarSesion">
-                    <!-- Email Input -->
                     <div class="form-group email-input-wrapper">
                         <label class="form-label" for="correoInput">
                             <i class="bi bi-envelope"></i> Correo Electrónico
@@ -40,7 +38,6 @@
                             required
                             autocomplete="email">
                         
-                        <!-- Email Suggestions -->
                         <div :class="['email-suggestions', { show: showEmailSuggestions && emailSuggestions.length > 0 }]">
                             <div
                                 v-for="email in emailSuggestions"
@@ -53,7 +50,6 @@
                         </div>
                     </div>
 
-                    <!-- Password Input -->
                     <div class="form-group password-group">
                         <label class="form-label" for="passwordInput">
                             <i class="bi bi-lock"></i> Contraseña
@@ -75,7 +71,6 @@
                         </button>
                     </div>
 
-                    <!-- Error Message -->
                     <div
                         v-if="mensajeError"
                         class="alert alert-danger">
@@ -83,7 +78,6 @@
                         {{ mensajeError }}
                     </div>
 
-                    <!-- Login Button -->
                     <button
                         type="submit"
                         class="btn btn-login"

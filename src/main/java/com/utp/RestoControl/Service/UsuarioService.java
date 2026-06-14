@@ -163,13 +163,6 @@ public class UsuarioService {
         return normalizado;
     }
 
-    /**
-     * Cambiar la contraseña de un usuario
-     * 
-     * @param idUsuario ID del usuario
-     * @param claveActual Contraseña actual (sin hashear)
-     * @param claveNueva Nueva contraseña (sin hashear)
-     */
     @Transactional
     public void cambiarContrasena(Integer idUsuario, String claveActual, String claveNueva) {
         Usuario usuario = buscarPorId(idUsuario);
@@ -188,12 +181,6 @@ public class UsuarioService {
         repository.save(usuario);
     }
 
-    /**
-     * Resetear la contraseña de un usuario (solo para administradores)
-     * 
-     * @param idUsuario ID del usuario
-     * @param claveNueva Nueva contraseña (sin hashear)
-     */
     @Transactional
     public void resetearContrasena(Integer idUsuario, String claveNueva) {
         Usuario usuario = buscarPorId(idUsuario);

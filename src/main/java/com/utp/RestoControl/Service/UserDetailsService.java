@@ -1,4 +1,4 @@
-package com.utp.RestoControl.Config;
+package com.utp.RestoControl.Service;
 
 import com.utp.RestoControl.Entity.Usuario;
 import com.utp.RestoControl.Repository.UsuarioRepository;
@@ -13,23 +13,12 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 
-/**
- * Servicio personalizado para cargar detalles de usuario desde la base de datos
- * Implementa UserDetailsService de Spring Security
- */
 @Service
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    /**
-     * Carga un usuario por su correo (nombre de usuario en Spring Security)
-     * 
-     * @param username El correo del usuario
-     * @return UserDetails del usuario
-     * @throws UsernameNotFoundException Si el usuario no es encontrado o está inactivo
-     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 

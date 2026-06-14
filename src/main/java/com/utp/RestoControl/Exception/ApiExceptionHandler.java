@@ -1,5 +1,4 @@
 package com.utp.RestoControl.Exception;
-
 import com.utp.RestoControl.Dto.ApiError;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

@@ -25,10 +25,6 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Controlador de Autenticación para RestoControl
- * Maneja login y logout de usuarios
- */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
@@ -42,12 +38,6 @@ public class AuthenticationController {
     @Autowired
     private UsuarioService usuarioService;
 
-    /**
-     * Endpoint POST para login
-     * 
-     * @param loginRequest Correo y contraseña del usuario
-     * @return Respuesta con datos del usuario autenticado
-     */
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @RequestBody LoginRequest loginRequest,
@@ -77,7 +67,6 @@ public class AuthenticationController {
                     context
             );
 
-            // AQUÍ continúa tu código actual
             Usuario usuario =
                     usuarioRepository.findByCorreoIgnoreCaseAndEliminadoFalse(
                             loginRequest.getCorreo()
@@ -127,9 +116,6 @@ public class AuthenticationController {
         }
     }
 
-    /**
-     * Endpoint POST para logout
-     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         SecurityContextHolder.clearContext();
@@ -139,9 +125,6 @@ public class AuthenticationController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Verificar si el usuario está autenticado
-     */
     @PostMapping("/verify")
     public ResponseEntity<?> verify() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -159,14 +142,6 @@ public class AuthenticationController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Cambiar la contraseña del usuario autenticado
-     * 
-     * Request body: {
-     *   "claveActual": "contraseña_actual",
-     *   "claveNueva": "contraseña_nueva"
-     * }
-     */
     @PostMapping("/cambiar-contrasena")
     public ResponseEntity<?> cambiarContrasena(@RequestBody Map<String, String> request) {
         try {

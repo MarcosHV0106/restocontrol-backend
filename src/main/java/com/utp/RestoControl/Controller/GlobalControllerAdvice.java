@@ -1,11 +1,9 @@
 package com.utp.RestoControl.Controller;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import com.utp.RestoControl.Entity.Usuario;
 import com.utp.RestoControl.Repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 
