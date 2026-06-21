@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PedidoRepository
         extends JpaRepository<Pedido, Integer> {
 
+    // PedidoRepository.java
+    List<Pedido> findByUsuario_IdUsuario(Integer idUsuario);
+
     List<Pedido> findByEliminadoFalse();
 
     Optional<Pedido> findByIdPedidoAndEliminadoFalse(
@@ -19,6 +22,6 @@ public interface PedidoRepository
     Optional<Pedido> findTopByIdMesa_IdMesaAndEstadoPedido_IdEstadoPedidoNotOrderByIdPedidoDesc(
         Integer idMesa,
         Integer idEstadoPedido
-);
+    );
 
 }

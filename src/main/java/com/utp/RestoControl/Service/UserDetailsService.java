@@ -2,6 +2,7 @@ package com.utp.RestoControl.Service;
 
 import com.utp.RestoControl.Entity.Usuario;
 import com.utp.RestoControl.Repository.UsuarioRepository;
+import com.utp.RestoControl.Security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,33 +26,13 @@ public class UserDetailsService implements org.springframework.security.core.use
         Usuario usuario = usuarioRepository.findByCorreoIgnoreCaseAndEliminadoFalse(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-            System.out.println("Encontrado: " + usuario.getCorreo());
-            System.out.println("Disponible: " + usuario.getDisponible());
-            System.out.println("Hash: " + usuario.getClave());
-
         // Verificar que el usuario esté disponible/activo
         if (!usuario.getDisponible()) {
-            throw new UsernameNotFoundException("Usuario inactivo o no disponible: " + username);
+            throw new UsernameNotFoundException("Usuario inactivo: " + username);
         }
 
-        // Construir las autoridades (roles)
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        if (usuario.getRol() != null) {
-            // Agregar el rol del usuario con prefijo ROLE_
-            String roleName = usuario.getRol().getNombreRol().toUpperCase().trim();
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + roleName));
-        } else {
-            // Rol por defecto si no tiene rol asignado
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        }
-
-        // Crear y retornar el UserDetails
-        // Nota: Los métodos accountNonExpired(), accountNonLocked(), credentialsNonExpired(), disabled()
-        // han sido removidos en Spring Security 6.x. Solo usamos username, password y authorities.
-        return User.builder()
-                .username(usuario.getCorreo())
-                .password(usuario.getClave())
-                .authorities(authorities)
-                .build();
+        // Simplemente retornas tu clase UserPrincipal.
+        // UserPrincipal ya se encarga de asignar los roles (authorities) en su constructor.
+        return new UserPrincipal(usuario);
     }
 }

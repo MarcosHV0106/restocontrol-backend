@@ -41,7 +41,7 @@ public class PedidoResponse {
                         pedido.getIdMesa()
                 ),
                 UsuarioResponse.from(
-                        pedido.getIdUsuario()
+                        pedido.getUsuario()
                 ),
                 EstadoPedidoResponse.from(
                         pedido.getEstadoPedido()

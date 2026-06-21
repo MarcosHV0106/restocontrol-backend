@@ -50,11 +50,6 @@ public class Pedido {
     private Mesa idMesa;
 
     @ManyToOne
-    @JoinColumn(name = "id_usuario",
-            nullable = false)
-    private Usuario idUsuario;
-
-    @ManyToOne
     @JoinColumn(name = "id_estado_pedido",
             nullable = false)
     private EstadoPedido estadoPedido;
@@ -65,4 +60,7 @@ public class Pedido {
     )
     private List<DetallePedido> detalles;
 
+    @ManyToOne
+    @JoinColumn(name = "id_usuario", nullable = false) // Esta es la única referencia necesaria
+    private Usuario usuario;
 }

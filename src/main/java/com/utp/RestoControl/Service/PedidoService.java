@@ -3,6 +3,7 @@ package com.utp.RestoControl.Service;
 import com.google.common.base.Preconditions;
 import com.utp.RestoControl.Dto.DetallePedidoRequest;
 import com.utp.RestoControl.Dto.PedidoRequest;
+import com.utp.RestoControl.Dto.PedidoResponse;
 import com.utp.RestoControl.Entity.*;
 import com.utp.RestoControl.Exception.ResourceNotFoundException;
 
@@ -13,9 +14,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.utp.RestoControl.Security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +33,7 @@ public class PedidoService {
     private final DetallePedidoRepository detalleRepository;
 
     private final MesaService mesaService;
+
 
     private final UsuarioService usuarioService;
 
@@ -56,13 +62,11 @@ public class PedidoService {
                 request.getIdMesa()
         );
 
-        Usuario usuario = usuarioService.buscarPorId(
-                request.getIdUsuario()
-        );
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+        Usuario usuario = usuarioService.buscarPorId(principal.getId());
 
-        EstadoPedido estado = estadoPedidoService.buscarPorId(
-                request.getIdEstadoPedido()
-        );
+        EstadoPedido estado = estadoPedidoService.buscarPorId(1);
 
         ModalidadPedido modalidad = modalidadPedidoService.buscarPorId(
                 request.getIdModalidadPedido()
@@ -80,7 +84,7 @@ public class PedidoService {
 
         pedido.setIdMesa(mesa);
 
-        pedido.setIdUsuario(usuario);
+        pedido.setUsuario(usuario);
 
         pedido.setEstadoPedido(estado);
 
@@ -183,6 +187,26 @@ public class PedidoService {
 
         return pedido;
 
+    }
+
+    @Transactional(readOnly = true)
+    public List<Pedido> listarPedidosSegunRol() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // 1. Verificamos si es ADMIN
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            return pedidoRepository.findAll(); // Administrador ve todo
+        } else {
+            // 2. Aquí hacemos el cast seguro a UserPrincipal
+            UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+            Integer idUsuarioLogueado = principal.getId();
+
+            // 3. Filtramos por el ID del usuario logueado
+            return pedidoRepository.findByUsuario_IdUsuario(idUsuarioLogueado);
+        }
     }
 
     @Transactional(readOnly = true)

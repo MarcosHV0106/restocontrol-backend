@@ -4,6 +4,8 @@ import com.utp.RestoControl.Dto.LoginRequest;
 import com.utp.RestoControl.Entity.Usuario;
 import com.utp.RestoControl.Repository.UsuarioRepository;
 import com.utp.RestoControl.Service.UsuarioService;
+import com.utp.RestoControl.Security.JwtUtil; // IMPORTANTE: Asegúrate de que la ruta coincida con tu paquete
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,15 +14,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,45 +36,38 @@ public class AuthenticationController {
     @Autowired
     private UsuarioService usuarioService;
 
+    // Inyectamos nuestra nueva clase utilitaria de JWT
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @RequestBody LoginRequest loginRequest,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-
-            Authentication authentication =
-                    authenticationManager.authenticate(
-                            new UsernamePasswordAuthenticationToken(
-                                    loginRequest.getCorreo(),
-                                    loginRequest.getClave()
-                            )
-                    );
-
-            SecurityContext context =
-                    SecurityContextHolder.createEmptyContext();
-
-            context.setAuthentication(authentication);
-
-            SecurityContextHolder.setContext(context);
-
-            HttpSession session = request.getSession(true);
-
-            session.setAttribute(
-                    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                    context
+            // 1. Autenticamos al usuario usando el AuthenticationManager
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getCorreo(),
+                            loginRequest.getClave()
+                    )
             );
 
-            Usuario usuario =
-                    usuarioRepository.findByCorreoIgnoreCaseAndEliminadoFalse(
-                            loginRequest.getCorreo()
-                    ).orElseThrow(() ->
-                            new BadCredentialsException("Usuario no encontrado"));
+            // 2. Extraemos el UserDetails autenticado
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
+            // 3. Generamos el Token JWT
+            String jwtToken = jwtUtil.generateToken(userDetails);
+
+            // 4. Buscamos el usuario en la BD para devolver sus datos al Frontend
+            Usuario usuario = usuarioRepository.findByCorreoIgnoreCaseAndEliminadoFalse(loginRequest.getCorreo())
+                    .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));
+
+            // 5. Armamos la respuesta JSON
             Map<String, Object> response = new HashMap<>();
-
             response.put("success", true);
             response.put("message", "Login exitoso");
+
+            // ¡ENVIAMOS EL TOKEN!
+            response.put("token", jwtToken);
 
             response.put("usuario", Map.of(
                     "idUsuario", usuario.getIdUsuario(),
@@ -91,54 +82,53 @@ public class AuthenticationController {
             return ResponseEntity.ok(response);
 
         } catch (BadCredentialsException e) {
-
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Correo o contraseña incorrectos");
-
             return ResponseEntity.badRequest().body(response);
 
         } catch (AuthenticationException e) {
-
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", e.getMessage());
-
             return ResponseEntity.badRequest().body(response);
 
         } catch (Exception e) {
-
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", e.getMessage());
-
             return ResponseEntity.internalServerError().body(response);
         }
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
+        // En un esquema JWT (Stateless), el backend no guarda estado.
+        // El verdadero "logout" consiste en que el Frontend (Vue) elimine el token del localStorage.
+        // Mantenemos la limpieza del contexto de seguridad por buena práctica para el hilo actual.
         SecurityContextHolder.clearContext();
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("message", "Logout exitoso");
+        response.put("message", "Logout exitoso (Recuerde eliminar el token en el cliente)");
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/verify")
     public ResponseEntity<?> verify() {
+        // Esto funcionará perfecto porque el JwtAuthenticationFilter rellena el contexto
+        // antes de que la petición llegue aquí.
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
+
         Map<String, Object> response = new HashMap<>();
-        
-        if (authentication != null && authentication.isAuthenticated()) {
+
+        if (authentication != null && authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
             response.put("authenticated", true);
             response.put("username", authentication.getName());
             response.put("authorities", authentication.getAuthorities());
         } else {
             response.put("authenticated", false);
         }
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -146,8 +136,8 @@ public class AuthenticationController {
     public ResponseEntity<?> cambiarContrasena(@RequestBody Map<String, String> request) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            
-            if (authentication == null || !authentication.isAuthenticated()) {
+
+            if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
                 response.put("message", "Usuario no autenticado");
@@ -172,11 +162,9 @@ public class AuthenticationController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Obtener usuario
             Usuario usuario = usuarioRepository.findByCorreoIgnoreCaseAndEliminadoFalse(correo)
                     .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));
 
-            // Cambiar contraseña
             usuarioService.cambiarContrasena(usuario.getIdUsuario(), claveActual, claveNueva);
 
             Map<String, Object> response = new HashMap<>();

@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/pedidos")
 
@@ -20,7 +22,17 @@ public class PedidoController {
 
     private final PedidoService service;
 
-    @PostMapping
+    @GetMapping
+    public ResponseEntity<List<PedidoResponse>> listar() {
+        return ResponseEntity.ok(
+                service.listarPedidosSegunRol()
+                        .stream()
+                        .map(PedidoResponse::from)
+                        .toList()
+        );
+    }
+
+    @PostMapping("crear")
     public ResponseEntity<PedidoResponse> guardar(
             @RequestBody PedidoRequest request) {
 
