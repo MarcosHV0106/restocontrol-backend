@@ -1,5 +1,6 @@
 package com.utp.RestoControl.Dto;
 
+import com.utp.RestoControl.Entity.EstadoMesa;
 import com.utp.RestoControl.Entity.Mesa;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +17,7 @@ public class MesaResponse {
 
     private Integer piso;
 
-    private String estadoMesa;
+    private EstadoMesa estadoMesa;
 
     public static MesaResponse from(Mesa mesa) {
 

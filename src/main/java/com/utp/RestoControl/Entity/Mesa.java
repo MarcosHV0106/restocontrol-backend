@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,9 +36,10 @@ public class Mesa {
     @Column(name = "piso", nullable = false)
     private Integer piso;
     
-    @Column(name = "estado_mesa", nullable = false, length = 30)
-    @JsonAlias("estado_mesa")
-    private String estadoMesa;
+    @ManyToOne
+    @JoinColumn(name = "id_estado_mesa",
+            nullable = false)
+    private EstadoMesa estadoMesa;
 
     @Column(nullable = false)
     private Boolean eliminado = false;

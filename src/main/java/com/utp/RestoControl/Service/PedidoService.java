@@ -34,7 +34,6 @@ public class PedidoService {
 
     private final MesaService mesaService;
 
-
     private final UsuarioService usuarioService;
 
     private final EstadoPedidoService estadoPedidoService;
@@ -42,6 +41,11 @@ public class PedidoService {
     private final ModalidadPedidoService modalidadPedidoService;
 
     private final AlimentoService alimentoService;
+
+    private static final Integer ESTADO_LIBRE = 1;
+    private static final Integer ESTADO_OCUPADA = 2;
+    private static final Integer ESTADO_RESERVADA = 3;
+    private static final Integer ESTADO_COBRAR = 4;
 
     @Transactional
     public Pedido guardar(
@@ -181,9 +185,10 @@ public class PedidoService {
 
         pedido.setDetalles(detalles);
 
-        mesa.setEstadoMesa("ocupada");
-
-        mesaService.actualizarEstado(mesa.getIdMesa(), "ocupada");
+        mesaService.actualizarEstado(
+                mesa.getIdMesa(),
+                ESTADO_OCUPADA
+        );
 
         return pedido;
 
@@ -214,14 +219,16 @@ public class PedidoService {
 
         Mesa mesa = mesaService.buscarPorId(idMesa);
 
-        if ("libre".equalsIgnoreCase(mesa.getEstadoMesa())) {
+        if (ESTADO_LIBRE.equals(
+                mesa.getEstadoMesa().getIdEstadoMesa()
+        )) {
             return null;
         }
 
         return pedidoRepository
                 .findTopByIdMesa_IdMesaAndEstadoPedido_IdEstadoPedidoNotOrderByIdPedidoDesc(
                         idMesa,
-                        4
+                        ESTADO_COBRAR
                 )
                 .orElse(null);
     }
@@ -245,8 +252,9 @@ public class PedidoService {
 
         Mesa mesa = pedido.getIdMesa();
 
-        mesa.setEstadoMesa(
-                "libre"
+        mesaService.actualizarEstado(
+                mesa.getIdMesa(),
+                ESTADO_COBRAR
         );
 
         return pedidoRepository.save(

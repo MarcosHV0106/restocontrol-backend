@@ -3,6 +3,7 @@ package com.utp.RestoControl.Service;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.utp.RestoControl.Dto.MesaRequest;
+import com.utp.RestoControl.Entity.EstadoMesa;
 import com.utp.RestoControl.Entity.Mesa;
 import com.utp.RestoControl.Exception.ResourceNotFoundException;
 import com.utp.RestoControl.Repository.MesaRepository;
@@ -16,7 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class MesaService {
 
     private final MesaRepository repository;
+    private final EstadoMesaService estadoMesaService;
 
+    private static final Integer ESTADO_LIBRE = 1;
+    private static final Integer ESTADO_OCUPADA = 2;
+    private static final Integer ESTADO_RESERVADA = 3;
+    private static final Integer ESTADO_COBRAR = 4;
     @Transactional(readOnly = true)
     public List<Mesa> listar() {
         return repository.findByEliminadoFalse();
@@ -24,22 +30,22 @@ public class MesaService {
 
     @Transactional(readOnly = true)
     public Integer contarMesasLibres() {
-        return repository.countByEstadoMesaAndEliminadoFalse("libre");
+        return repository.countByEstadoMesa_IdEstadoMesaAndEliminadoFalse(ESTADO_LIBRE);
     }
 
     @Transactional(readOnly = true)
     public Integer contarMesasOcupadas() {
-        return repository.countByEstadoMesaAndEliminadoFalse("ocupada");
+        return repository.countByEstadoMesa_IdEstadoMesaAndEliminadoFalse(ESTADO_OCUPADA);
     }
 
     @Transactional(readOnly = true)
     public Integer contarMesasReservadas() {
-        return repository.countByEstadoMesaAndEliminadoFalse("reservada");
+        return repository.countByEstadoMesa_IdEstadoMesaAndEliminadoFalse(ESTADO_RESERVADA);
     }
 
     @Transactional(readOnly = true)
     public Integer contarMesasPorCobrar() {
-        return repository.countByEstadoMesaAndEliminadoFalse("cobrar");
+        return repository.countByEstadoMesa_IdEstadoMesaAndEliminadoFalse(ESTADO_COBRAR);
     }
 
     @Transactional(readOnly = true)
@@ -67,7 +73,9 @@ public class MesaService {
                 request.getPiso()
         );
 
-        mesa.setEstadoMesa("libre");
+        EstadoMesa estadoLibre = estadoMesaService.buscarPorId(1);
+
+        mesa.setEstadoMesa(estadoLibre);
 
         mesa.setEliminado(false);
 
@@ -108,17 +116,16 @@ public class MesaService {
     }
 
     @Transactional
-    public void actualizarEstado(
-            Integer idMesa,
-            String estado) {
+    public void actualizarEstado(Integer idMesa, Integer idEstadoMesa) {
 
-        Mesa mesa = buscarPorId(idMesa);
+    Mesa mesa = buscarPorId(idMesa);
 
-        mesa.setEstadoMesa(estado);
+    EstadoMesa estado = estadoMesaService.buscarPorId(idEstadoMesa);
 
-        repository.save(mesa);
+    mesa.setEstadoMesa(estado);
 
-    }
+    repository.save(mesa);
+}
 
     private void validarMesa(
             MesaRequest mesa,
