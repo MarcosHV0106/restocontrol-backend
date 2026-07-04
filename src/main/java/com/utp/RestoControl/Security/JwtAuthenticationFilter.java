@@ -4,6 +4,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,15 +16,14 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
-    // Inyección de dependencias por constructor
     public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
@@ -35,47 +37,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
-
-        System.out.println("\n====== INICIO DEBUG JWT ======");
-        System.out.println("Ruta solicitada: " + request.getRequestURI());
-        System.out.println("Método HTTP: " + request.getMethod());
-        System.out.println("Header Authorization recibido: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("❌ No hay token o no empieza con Bearer. Pasando al siguiente filtro...");
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-
         try {
-            userEmail = jwtUtil.extractUsername(jwt);
-            System.out.println("✅ Correo extraído del token: " + userEmail);
+            String jwt = authHeader.substring(7);
+            String userEmail = jwtUtil.extractUsername(jwt);
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
                 if (jwtUtil.isTokenValid(jwt, userDetails)) {
-                    System.out.println("✅ Token válido criptográficamente.");
-                    System.out.println("✅ Autoridades otorgadas por la BD: " + userDetails.getAuthorities());
-
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities()
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                } else {
-                    System.out.println("❌ El token NO es válido (quizás expiró o el usuario no coincide).");
                 }
             }
-        } catch (Exception e) {
-            System.out.println("❌ Error fatal procesando el token: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        } catch (Exception ex) {
+            LOGGER.debug("No se pudo procesar el JWT: {}", ex.getMessage());
         }
 
-        System.out.println("====== FIN DEBUG JWT ======\n");
         filterChain.doFilter(request, response);
     }
 }

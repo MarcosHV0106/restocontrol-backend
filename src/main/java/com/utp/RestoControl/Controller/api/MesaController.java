@@ -1,10 +1,12 @@
 package com.utp.RestoControl.Controller.api;
 
 import com.utp.RestoControl.Dto.MesaRequest;
+import com.utp.RestoControl.Dto.MesaConPedidoResponse;
 import com.utp.RestoControl.Dto.MesaResponse;
 import com.utp.RestoControl.Entity.Mesa;
+import com.utp.RestoControl.Entity.Pedido;
 import com.utp.RestoControl.Service.MesaService;
-import java.util.HashMap;
+import com.utp.RestoControl.Service.PedidoService;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MesaController {
 
     private final MesaService service;
+    private final PedidoService pedidoService;
 
     @GetMapping
     public List<MesaResponse> listar() {
@@ -35,6 +38,22 @@ public class MesaController {
                 .map(MesaResponse::from)
                 .toList();
 
+    }
+
+    @GetMapping("/con-pedidos")
+    public List<MesaConPedidoResponse> listarConPedidos() {
+        List<Mesa> mesas = service.listar();
+        List<Integer> idsMesasConConsumo = mesas.stream()
+                .filter(mesa -> mesa.getEstadoMesa() != null)
+                .filter(mesa -> !"libre".equals(mesa.getEstadoMesa().getDescripcion()))
+                .map(Mesa::getIdMesa)
+                .toList();
+
+        Map<Integer, Pedido> pedidosPorMesa = pedidoService.buscarUltimosPorMesas(idsMesasConConsumo);
+
+        return mesas.stream()
+                .map(mesa -> MesaConPedidoResponse.from(mesa, pedidosPorMesa.get(mesa.getIdMesa())))
+                .toList();
     }
 
     @GetMapping("{id}")
@@ -80,14 +99,6 @@ public class MesaController {
 
     @GetMapping("/resumen")
     public Map<String, Integer> resumen() {
-
-        Map<String, Integer> datos = new HashMap<>();
-
-        datos.put("libres", service.contarMesasLibres());
-        datos.put("ocupadas", service.contarMesasOcupadas());
-        datos.put("reservadas", service.contarMesasReservadas());
-        datos.put("cobradas", service.contarMesasPorCobrar());
-
-        return datos;
+        return service.resumen();
     }
 }

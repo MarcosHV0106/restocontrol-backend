@@ -18,7 +18,7 @@ public class CategoriaService {
 
     @Transactional(readOnly = true)
     public List<CategoriaAlimento> listar() {
-        return repository.findAll();
+        return repository.findByEliminadoFalse();
     }
 
     @Transactional(readOnly = true)

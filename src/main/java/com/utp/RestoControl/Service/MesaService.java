@@ -7,7 +7,9 @@ import com.utp.RestoControl.Entity.EstadoMesa;
 import com.utp.RestoControl.Entity.Mesa;
 import com.utp.RestoControl.Exception.ResourceNotFoundException;
 import com.utp.RestoControl.Repository.MesaRepository;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +27,7 @@ public class MesaService {
     private static final Integer ESTADO_COBRAR = 4;
     @Transactional(readOnly = true)
     public List<Mesa> listar() {
-        return repository.findByEliminadoFalse();
+        return repository.findByEliminadoFalseOrderByNumeroMesaAsc();
     }
 
     @Transactional(readOnly = true)
@@ -46,6 +48,31 @@ public class MesaService {
     @Transactional(readOnly = true)
     public Integer contarMesasPorCobrar() {
         return repository.countByEstadoMesa_IdEstadoMesaAndEliminadoFalse(ESTADO_COBRAR);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Integer> resumen() {
+        Map<String, Integer> resumen = new HashMap<>();
+        resumen.put("libres", 0);
+        resumen.put("ocupadas", 0);
+        resumen.put("reservadas", 0);
+        resumen.put("cobradas", 0);
+
+        for (Object[] fila : repository.countMesasAgrupadasPorEstado()) {
+            String estado = String.valueOf(fila[0]);
+            Integer total = ((Number) fila[1]).intValue();
+
+            switch (estado) {
+                case "libre" -> resumen.put("libres", total);
+                case "ocupada" -> resumen.put("ocupadas", total);
+                case "reservada" -> resumen.put("reservadas", total);
+                case "cobrar" -> resumen.put("cobradas", total);
+                default -> {
+                }
+            }
+        }
+
+        return resumen;
     }
 
     @Transactional(readOnly = true)

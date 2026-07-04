@@ -13,7 +13,9 @@ import com.utp.RestoControl.Repository.PedidoRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.utp.RestoControl.Security.UserPrincipal;
@@ -177,12 +179,6 @@ public class PedidoService {
 
         pedido = pedidoRepository.save(pedido);
 
-        detalleRepository.saveAll(detalles);
-
-        pedido.setTotal(totalPedido);
-
-        pedido = pedidoRepository.save(pedido);
-
         pedido.setDetalles(detalles);
 
         mesaService.actualizarEstado(
@@ -203,15 +199,32 @@ public class PedidoService {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         if (isAdmin) {
-            return pedidoRepository.findAll(); // Administrador ve todo
+            return pedidoRepository.findActivosConRelaciones();
         } else {
             // 2. Aquí hacemos el cast seguro a UserPrincipal
             UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
             Integer idUsuarioLogueado = principal.getId();
 
             // 3. Filtramos por el ID del usuario logueado
-            return pedidoRepository.findByUsuario_IdUsuario(idUsuarioLogueado);
+            return pedidoRepository.findActivosConRelacionesByUsuario(idUsuarioLogueado);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Integer, Pedido> buscarUltimosPorMesas(Collection<Integer> idsMesa) {
+        if (idsMesa == null || idsMesa.isEmpty()) {
+            return Map.of();
+        }
+
+        return pedidoRepository.findUltimosActivosPorMesas(
+                        idsMesa.stream().distinct().toList(),
+                        ESTADO_COBRAR
+                )
+                .stream()
+                .collect(Collectors.toMap(
+                        pedido -> pedido.getIdMesa().getIdMesa(),
+                        pedido -> pedido
+                ));
     }
 
     @Transactional(readOnly = true)
@@ -226,7 +239,7 @@ public class PedidoService {
         }
 
         return pedidoRepository
-                .findTopByIdMesa_IdMesaAndEstadoPedido_IdEstadoPedidoNotOrderByIdPedidoDesc(
+                .findTopByIdMesa_IdMesaAndEstadoPedido_IdEstadoPedidoNotAndEliminadoFalseOrderByIdPedidoDesc(
                         idMesa,
                         ESTADO_COBRAR
                 )
