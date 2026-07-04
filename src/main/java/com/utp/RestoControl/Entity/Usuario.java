@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,6 +40,15 @@ public class Usuario {
     
     @Column(name = "clave", nullable = false, length = 100)
     private String clave;
+
+    @Column(name = "pendiente", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private Boolean pendiente = false;
+
+    @Column(name = "token_activacion_hash", length = 120)
+    private String tokenActivacionHash;
+
+    @Column(name = "token_activacion_expira")
+    private LocalDateTime tokenActivacionExpira;
     
     @ManyToOne
     @JoinColumn(name = "id_rol",

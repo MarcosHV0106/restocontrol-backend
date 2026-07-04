@@ -41,7 +41,7 @@ public class SecurityConfig {
 
                 // Autorización de rutas modificada a Autoridades directas
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/login", "/api/auth/registro").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/registro", "/api/auth/activaciones/**").permitAll()
                         // Nota: Al usar hasAnyRole, NO pongas el prefijo "ROLE_" aquí,
                         // Spring lo añade automáticamente por ti.
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

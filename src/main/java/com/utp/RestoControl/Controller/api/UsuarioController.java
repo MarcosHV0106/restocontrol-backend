@@ -44,6 +44,11 @@ public class UsuarioController {
                 .body(UsuarioResponse.from(service.guardar(usuarioPedido)));
     }
 
+    @PostMapping("{id}/reenviar-activacion")
+    public UsuarioResponse reenviarActivacion(@PathVariable Integer id) {
+        return UsuarioResponse.from(service.reenviarActivacion(id));
+    }
+
     @PutMapping("{id}")
     public UsuarioResponse actualizar(
             @PathVariable Integer id,

@@ -1,5 +1,6 @@
 package com.utp.RestoControl.Controller.api;
 
+import com.utp.RestoControl.Dto.ActivacionCuentaRequest;
 import com.utp.RestoControl.Dto.LoginRequest;
 import com.utp.RestoControl.Entity.Usuario;
 import com.utp.RestoControl.Repository.UsuarioRepository;
@@ -15,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -99,6 +102,18 @@ public class AuthenticationController {
             response.put("message", e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
+    }
+
+    @GetMapping("/activaciones/{token}")
+    public ResponseEntity<?> validarActivacion(@PathVariable String token) {
+        return ResponseEntity.ok(usuarioService.validarTokenActivacion(token));
+    }
+
+    @PostMapping("/activaciones/{token}/crear-clave")
+    public ResponseEntity<?> crearClaveActivacion(
+            @PathVariable String token,
+            @RequestBody ActivacionCuentaRequest request) {
+        return ResponseEntity.ok(usuarioService.crearClaveActivacion(token, request));
     }
 
     @PostMapping("/logout")

@@ -29,6 +29,11 @@ public class ApiExceptionHandler {
         return construirRespuesta("No se pudo completar la operacion por restricciones de datos.", HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiError> manejarErrorInterno(IllegalStateException exception) {
+        return construirRespuesta(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private ResponseEntity<ApiError> construirRespuesta(String mensaje, HttpStatus estado) {
         return ResponseEntity
                 .status(estado)

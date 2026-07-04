@@ -26,6 +26,12 @@ public class DataInitializer {
                 boolean hayActualizaciones = false;
                 
                 for (Usuario usuario : usuarios) {
+                    if (usuario.getPendiente() == null) {
+                        usuario.setPendiente(false);
+                        usuarioRepository.save(usuario);
+                        hayActualizaciones = true;
+                    }
+
                     if (usuario.getClave() != null && !esHashBCrypt(usuario.getClave())) {
                         usuario.setClave(passwordEncoder.encode(usuario.getClave()));
                         usuarioRepository.save(usuario);

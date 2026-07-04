@@ -27,8 +27,12 @@ public class UserDetailsService implements org.springframework.security.core.use
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
         // Verificar que el usuario esté disponible/activo
-        if (!usuario.getDisponible()) {
+        if (Boolean.FALSE.equals(usuario.getDisponible())) {
             throw new UsernameNotFoundException("Usuario inactivo: " + username);
+        }
+
+        if (Boolean.TRUE.equals(usuario.getPendiente())) {
+            throw new UsernameNotFoundException("Cuenta pendiente de activacion: " + username);
         }
 
         // Simplemente retornas tu clase UserPrincipal.

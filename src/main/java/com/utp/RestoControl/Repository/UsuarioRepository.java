@@ -15,6 +15,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer>{
 
     Optional<Usuario> findByCorreoIgnoreCaseAndEliminadoFalse(String correo);
 
+    Optional<Usuario> findByTokenActivacionHashAndEliminadoFalse(String tokenActivacionHash);
+
     boolean existsByCorreoIgnoreCaseAndEliminadoFalse(String correo);
 
     boolean existsByCorreoIgnoreCaseAndIdUsuarioNotAndEliminadoFalse(String correo, Integer idUsuario);

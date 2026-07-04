@@ -13,6 +13,9 @@ public class UsuarioResponse {
     private String apellido;
     private String correo;
     private RolResponse rol;
+    private Boolean disponible;
+    private Boolean pendiente;
+    private String estadoCuenta;
 
     public static UsuarioResponse from(Usuario usuario) {
         return new UsuarioResponse(
@@ -20,7 +23,22 @@ public class UsuarioResponse {
                 usuario.getNombre(),
                 usuario.getApellido(),
                 usuario.getCorreo(),
-                RolResponse.from(usuario.getRol())
+                RolResponse.from(usuario.getRol()),
+                usuario.getDisponible(),
+                Boolean.TRUE.equals(usuario.getPendiente()),
+                resolverEstadoCuenta(usuario)
         );
+    }
+
+    private static String resolverEstadoCuenta(Usuario usuario) {
+        if (Boolean.TRUE.equals(usuario.getPendiente())) {
+            return "PENDIENTE";
+        }
+
+        if (Boolean.FALSE.equals(usuario.getDisponible())) {
+            return "INACTIVO";
+        }
+
+        return "ACTIVO";
     }
 }
