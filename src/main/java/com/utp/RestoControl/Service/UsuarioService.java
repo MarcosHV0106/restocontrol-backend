@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.utp.RestoControl.Dto.ActivacionCuentaRequest;
 import com.utp.RestoControl.Dto.ActivacionCuentaResponse;
+import com.utp.RestoControl.Dto.CambiarClaveRequest;
 import com.utp.RestoControl.Dto.LoginRequest;
 import com.utp.RestoControl.Dto.LoginResponse;
 import com.utp.RestoControl.Dto.UsuarioRequest;
@@ -316,5 +317,34 @@ public class UsuarioService {
         } catch (NoSuchAlgorithmException ex) {
             throw new IllegalStateException("No se pudo generar el hash del token de activacion.", ex);
         }
+    }
+
+    @Transactional
+    public void cambiarContrasenaPerfil(Integer idUsuario, CambiarClaveRequest request) {
+
+        Preconditions.checkArgument(request != null, "La solicitud es obligatoria.");
+
+        Preconditions.checkArgument(
+                request.getClaveNueva().equals(request.getConfirmarClave()),
+                "Las contraseñas no coinciden.");
+
+        Preconditions.checkArgument(
+                !request.getClaveActual().equals(request.getClaveNueva()),
+                "La nueva contraseña debe ser diferente a la actual.");
+
+        Usuario usuario = buscarPorId(idUsuario);
+
+        validarUsuarioPuedeAutenticarse(usuario);
+
+        if (!passwordEncoder.matches(request.getClaveActual(), usuario.getClave())) {
+            throw new IllegalArgumentException(
+                    "La contraseña actual es incorrecta.");
+        }
+
+        validarLongitudClave(request.getClaveNueva());
+
+        usuario.setClave(passwordEncoder.encode(request.getClaveNueva()));
+
+        repository.save(usuario);
     }
 }

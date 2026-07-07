@@ -1,6 +1,9 @@
-
 package com.utp.RestoControl.Controller.api;
 
+import com.utp.RestoControl.Dto.CambiarClaveRequest;
+import com.utp.RestoControl.Security.UserPrincipal;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.utp.RestoControl.Dto.UsuarioRequest;
 import com.utp.RestoControl.Dto.UsuarioResponse;
 import com.utp.RestoControl.Service.UsuarioService;
@@ -22,10 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 public class UsuarioController {
+
     private final UsuarioService service;
-    
+
     @GetMapping
-    public List<UsuarioResponse> listar(){
+    public List<UsuarioResponse> listar() {
         return service.listar()
                 .stream()
                 .map(UsuarioResponse::from)
@@ -36,9 +40,9 @@ public class UsuarioController {
     public UsuarioResponse buscarPorId(@PathVariable Integer id) {
         return UsuarioResponse.from(service.buscarPorId(id));
     }
-    
+
     @PostMapping
-    public ResponseEntity<UsuarioResponse> guardar(@RequestBody UsuarioRequest usuarioPedido){
+    public ResponseEntity<UsuarioResponse> guardar(@RequestBody UsuarioRequest usuarioPedido) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(UsuarioResponse.from(service.guardar(usuarioPedido)));
@@ -59,6 +63,22 @@ public class UsuarioController {
     @DeleteMapping("{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         service.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("cambiar-contrasena")
+    public ResponseEntity<Void> cambiarContrasena(
+            @RequestBody CambiarClaveRequest request) {
+
+        UserPrincipal principal = (UserPrincipal) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        service.cambiarContrasenaPerfil(
+                principal.getId(),
+                request);
+
         return ResponseEntity.noContent().build();
     }
 }
