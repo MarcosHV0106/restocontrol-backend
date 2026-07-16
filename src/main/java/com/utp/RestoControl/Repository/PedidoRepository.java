@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Lock;
+import jakarta.persistence.LockModeType;
 
 public interface PedidoRepository
         extends JpaRepository<Pedido, Integer> {
@@ -47,6 +49,53 @@ public interface PedidoRepository
             """)
     List<Pedido> findActivosConRelacionesByUsuario(@Param("idUsuario") Integer idUsuario);
 
+    @Query("""
+            select distinct p
+            from Pedido p
+            join fetch p.idMesa m
+            join fetch m.estadoMesa
+            join fetch p.usuario u
+            join fetch u.rol
+            join fetch p.estadoPedido ep
+            join fetch p.modalidadPedido
+            left join fetch p.detalles d
+            left join fetch d.idAlimento a
+            left join fetch a.categoria
+            where p.eliminado = false
+            and ep.idEstadoPedido <> 4
+            and upper(ep.nombreEstado) not in ('PAGADO', 'COBRADO', 'CANCELADO')
+            and not exists (
+                select c.idCobro from Cobro c
+                where c.pedido.idPedido = p.idPedido and c.eliminado = false
+            )
+            order by p.fechaPedido asc
+            """)
+    List<Pedido> findPendientesDeCobroConRelaciones();
+
+    @Query("""
+            select distinct p
+            from Pedido p
+            join fetch p.idMesa m
+            join fetch m.estadoMesa
+            join fetch p.usuario u
+            join fetch u.rol
+            join fetch p.estadoPedido ep
+            join fetch p.modalidadPedido
+            left join fetch p.detalles d
+            left join fetch d.idAlimento a
+            left join fetch a.categoria
+            where p.eliminado = false
+            and u.idUsuario = :idUsuario
+            and ep.idEstadoPedido <> 4
+            and upper(ep.nombreEstado) not in ('PAGADO', 'COBRADO', 'CANCELADO')
+            and not exists (
+                select c.idCobro from Cobro c
+                where c.pedido.idPedido = p.idPedido and c.eliminado = false
+            )
+            order by p.fechaPedido asc
+            """)
+    List<Pedido> findPendientesDeCobroPorUsuario(@Param("idUsuario") Integer idUsuario);
+
     @EntityGraph(attributePaths = {
             "idMesa.estadoMesa",
             "usuario.rol",
@@ -67,6 +116,21 @@ public interface PedidoRepository
     })
     Optional<Pedido> findByIdPedidoAndEliminadoFalse(
             Integer idPedido);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @EntityGraph(attributePaths = {
+        "idMesa.estadoMesa",
+        "usuario.rol",
+        "estadoPedido",
+        "modalidadPedido",
+        "detalles.idAlimento.categoria"
+    })
+    @Query("""
+            select p from Pedido p
+            where p.idPedido = :idPedido
+            and p.eliminado = false
+            """)
+    Optional<Pedido> findActivoParaCobro(@Param("idPedido") Integer idPedido);
 
     @EntityGraph(attributePaths = {
             "idMesa.estadoMesa",

@@ -1,0 +1,171 @@
+package com.utp.RestoControl.Service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.utp.RestoControl.Dto.DetallePedidoRequest;
+import com.utp.RestoControl.Dto.PedidoRequest;
+import com.utp.RestoControl.Entity.Alimento;
+import com.utp.RestoControl.Entity.EstadoPedido;
+import com.utp.RestoControl.Entity.Mesa;
+import com.utp.RestoControl.Entity.ModalidadPedido;
+import com.utp.RestoControl.Entity.Pedido;
+import com.utp.RestoControl.Entity.Usuario;
+import com.utp.RestoControl.Repository.DetallePedidoRepository;
+import com.utp.RestoControl.Repository.PedidoRepository;
+import com.utp.RestoControl.Security.UserPrincipal;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+@ExtendWith(MockitoExtension.class)
+class PedidoServiceTests {
+
+    @Mock
+    private PedidoRepository pedidoRepository;
+    @Mock
+    private DetallePedidoRepository detalleRepository;
+    @Mock
+    private MesaService mesaService;
+    @Mock
+    private UsuarioService usuarioService;
+    @Mock
+    private EstadoPedidoService estadoPedidoService;
+    @Mock
+    private ModalidadPedidoService modalidadPedidoService;
+    @Mock
+    private AlimentoService alimentoService;
+
+    @InjectMocks
+    private PedidoService pedidoService;
+
+    @AfterEach
+    void limpiarContextoDeSeguridad() {
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    void administradorListaPedidosDeTodosLosUsuarios() {
+        autenticar(1, "ADMIN");
+        List<Pedido> esperados = List.of(new Pedido(), new Pedido());
+        when(pedidoRepository.findActivosConRelaciones()).thenReturn(esperados);
+
+        List<Pedido> resultado = pedidoService.listarPedidosSegunRol();
+
+        assertSame(esperados, resultado);
+        verify(pedidoRepository, never()).findActivosConRelacionesByUsuario(any());
+    }
+
+    @Test
+    void meseroListaUnicamenteSusPedidos() {
+        autenticar(7, "MESERO");
+        List<Pedido> esperados = List.of(new Pedido());
+        when(pedidoRepository.findActivosConRelacionesByUsuario(7)).thenReturn(esperados);
+
+        List<Pedido> resultado = pedidoService.listarPedidosSegunRol();
+
+        assertSame(esperados, resultado);
+        verify(pedidoRepository, never()).findActivosConRelaciones();
+    }
+
+    @Test
+    void meseroNoPuedeConsultarPedidoAjeno() {
+        autenticar(7, "MESERO");
+        Pedido pedidoAjeno = pedidoConCreador(15);
+        when(pedidoRepository.findByIdPedidoAndEliminadoFalse(20)).thenReturn(Optional.of(pedidoAjeno));
+
+        assertThrows(AccessDeniedException.class, () -> pedidoService.buscarPorIdSegunRol(20));
+    }
+
+    @Test
+    void administradorPuedeConsultarPedidoAjeno() {
+        autenticar(1, "ADMIN");
+        Pedido pedidoAjeno = pedidoConCreador(15);
+        when(pedidoRepository.findByIdPedidoAndEliminadoFalse(20)).thenReturn(Optional.of(pedidoAjeno));
+
+        Pedido resultado = pedidoService.buscarPorIdSegunRol(20);
+
+        assertSame(pedidoAjeno, resultado);
+    }
+
+    @Test
+    void actualizarPedidoConservaElCreadorOriginalYRecalculaElTotal() {
+        autenticar(7, "MESERO");
+        Usuario creador = new Usuario();
+        creador.setIdUsuario(7);
+
+        Mesa mesa = new Mesa();
+        mesa.setIdMesa(3);
+
+        Pedido pedido = new Pedido();
+        pedido.setIdPedido(20);
+        pedido.setUsuario(creador);
+        pedido.setIdMesa(mesa);
+        pedido.setEstadoPedido(new EstadoPedido(1, "PENDIENTE", false));
+
+        ModalidadPedido modalidad = new ModalidadPedido(1, "MESA", false);
+        Alimento alimento = new Alimento();
+        alimento.setIdAlimento(5);
+        alimento.setPrecio(new BigDecimal("12.50"));
+
+        PedidoRequest request = new PedidoRequest(
+                3,
+                999,
+                1,
+                1,
+                "  Sin cebolla  ",
+                List.of(new DetallePedidoRequest(5, 2))
+        );
+
+        when(pedidoRepository.findByIdPedidoAndEliminadoFalse(20)).thenReturn(Optional.of(pedido));
+        when(modalidadPedidoService.buscarPorId(1)).thenReturn(modalidad);
+        when(detalleRepository.findByIdPedido_IdPedidoAndEliminadoFalse(20)).thenReturn(List.of());
+        when(alimentoService.buscarPorId(5)).thenReturn(alimento);
+        when(pedidoRepository.save(any(Pedido.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Pedido actualizado = pedidoService.actualizar(20, request);
+
+        assertSame(creador, actualizado.getUsuario());
+        assertEquals("Sin cebolla", actualizado.getObservacion());
+        assertEquals(new BigDecimal("25.00"), actualizado.getTotal());
+        assertEquals(1, actualizado.getDetalles().size());
+        assertEquals(7, actualizado.getUsuario().getIdUsuario());
+    }
+
+    private Pedido pedidoConCreador(Integer idUsuario) {
+        Usuario creador = new Usuario();
+        creador.setIdUsuario(idUsuario);
+        Pedido pedido = new Pedido();
+        pedido.setUsuario(creador);
+        return pedido;
+    }
+
+    private void autenticar(Integer idUsuario, String rol) {
+        UserPrincipal principal = mock(UserPrincipal.class);
+        if (!"ADMIN".equals(rol)) {
+            when(principal.getId()).thenReturn(idUsuario);
+        }
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_" + rol))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+}
