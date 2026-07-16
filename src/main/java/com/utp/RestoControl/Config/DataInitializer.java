@@ -7,9 +7,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Configuration
 public class DataInitializer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataInitializer.class);
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -40,14 +44,13 @@ public class DataInitializer {
                 }
                 
                 if (hayActualizaciones) {
-                    System.out.println("✓ Contraseñas hasheadas correctamente");
+                    LOGGER.info("Inicializacion de usuarios completada resultado=ACTUALIZADO");
                 } else {
-                    System.out.println("✓ Todas las contraseñas ya están hasheadas");
+                    LOGGER.info("Inicializacion de usuarios completada resultado=SIN_CAMBIOS");
                 }
                 
             } catch (Exception e) {
-                System.err.println("Error al inicializar datos: " + e.getMessage());
-                e.printStackTrace();
+                LOGGER.error("No se pudo completar la inicializacion de usuarios", e);
             }
         };
     }

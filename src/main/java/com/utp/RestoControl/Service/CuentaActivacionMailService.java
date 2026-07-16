@@ -9,10 +9,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
 public class CuentaActivacionMailService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CuentaActivacionMailService.class);
 
     private final JavaMailSender mailSender;
 
@@ -41,6 +45,7 @@ public class CuentaActivacionMailService {
             helper.setText(construirHtml(usuario, enlace), true);
 
             mailSender.send(mensaje);
+            LOGGER.info("Invitacion de activacion enviada usuarioId={}", usuario.getIdUsuario());
         } catch (MessagingException | UnsupportedEncodingException ex) {
             throw new IllegalStateException("No se pudo preparar el correo de activacion.", ex);
         } catch (RuntimeException ex) {

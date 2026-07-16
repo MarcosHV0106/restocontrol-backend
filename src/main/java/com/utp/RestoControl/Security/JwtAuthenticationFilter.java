@@ -61,7 +61,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception ex) {
-            LOGGER.debug("No se pudo procesar el JWT: {}", ex.getMessage());
+            LOGGER.debug(
+                    "JWT rechazado tipoError={}",
+                    ex.getClass().getSimpleName()
+            );
         }
 
         filterChain.doFilter(request, response);

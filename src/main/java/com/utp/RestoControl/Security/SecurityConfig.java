@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.http.HttpMethod;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +24,9 @@ public class SecurityConfig {
 
     // Tendrás que inyectar el filtro JWT que crearemos (ejemplo de inyección)
     private final JwtAuthenticationFilter jwtAuthFilter;
+
+    @Value("${restocontrol.logging.request-id-header:X-Request-ID}")
+    private String requestIdHeader;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
@@ -68,6 +72,7 @@ public class SecurityConfig {
                     config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:5173"));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("*"));
+                    config.setExposedHeaders(List.of(requestIdHeader));
                     config.setAllowCredentials(true);
                     return config;
                 }))
