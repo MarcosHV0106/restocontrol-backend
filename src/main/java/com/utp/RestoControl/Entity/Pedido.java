@@ -44,6 +44,15 @@ public class Pedido {
     @Column(name = "fecha_pago")
     private LocalDateTime fechaPago;
 
+    @Column(name = "fecha_inicio_preparacion")
+    private LocalDateTime fechaInicioPreparacion;
+
+    @Column(name = "fecha_listo")
+    private LocalDateTime fechaListo;
+
+    @Column(name = "fecha_entregado")
+    private LocalDateTime fechaEntregado;
+
     @Column(name = "metodo_pago", length = 30)
     private String metodoPago;
 
