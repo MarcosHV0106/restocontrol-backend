@@ -46,6 +46,29 @@ public class PedidoController {
 
     }
 
+    @GetMapping("/{idPedido}")
+    public ResponseEntity<PedidoResponse> buscarPorId(
+            @PathVariable Integer idPedido) {
+
+        return ResponseEntity.ok(
+                PedidoResponse.from(
+                        service.buscarPorIdSegunRol(idPedido)
+                )
+        );
+    }
+
+    @PutMapping("/{idPedido}")
+    public ResponseEntity<PedidoResponse> actualizar(
+            @PathVariable Integer idPedido,
+            @RequestBody PedidoRequest request) {
+
+        return ResponseEntity.ok(
+                PedidoResponse.from(
+                        service.actualizar(idPedido, request)
+                )
+        );
+    }
+
     @GetMapping("/mesa/{idMesa}")
     public ResponseEntity<PedidoResponse> buscarPorMesa(
             @PathVariable Integer idMesa) {

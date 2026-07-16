@@ -119,6 +119,34 @@ public interface PedidoRepository
     @Query("""
             select distinct p
             from Pedido p
+            join fetch p.idMesa m
+            join fetch p.usuario u
+            join fetch p.estadoPedido
+            left join fetch p.detalles d
+            left join fetch d.idAlimento a
+            left join fetch a.categoria
+            where p.eliminado = false
+            and m.idMesa in :idsMesa
+            and p.estadoPedido.idEstadoPedido <> :idEstadoPedidoExcluido
+            and u.idUsuario = :idUsuario
+            and p.idPedido in (
+                select max(p2.idPedido)
+                from Pedido p2
+                where p2.eliminado = false
+                and p2.estadoPedido.idEstadoPedido <> :idEstadoPedidoExcluido
+                and p2.idMesa.idMesa in :idsMesa
+                group by p2.idMesa.idMesa
+            )
+            """)
+    List<Pedido> findUltimosActivosPorMesasDelUsuario(
+            @Param("idsMesa") List<Integer> idsMesa,
+            @Param("idEstadoPedidoExcluido") Integer idEstadoPedidoExcluido,
+            @Param("idUsuario") Integer idUsuario
+    );
+
+    @Query("""
+            select distinct p
+            from Pedido p
             join fetch p.idMesa
             join fetch p.usuario u
             join fetch u.rol

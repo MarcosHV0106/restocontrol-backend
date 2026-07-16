@@ -26,6 +26,7 @@ public class PedidoMesaResponse {
                 pedido.getTotal(),
                 (pedido.getDetalles() == null ? Collections.<DetallePedido>emptyList() : pedido.getDetalles())
                         .stream()
+                        .filter(detalle -> !Boolean.TRUE.equals(detalle.getEliminado()))
                         .map(DetallePedidoMesaResponse::from)
                         .toList()
         );

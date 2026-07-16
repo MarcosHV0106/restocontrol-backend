@@ -3,6 +3,7 @@ package com.utp.RestoControl.Dto;
 import com.utp.RestoControl.Entity.Pedido;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -55,8 +56,11 @@ public class PedidoResponse {
                 ModalidadPedidoResponse.from(
                         pedido.getModalidadPedido()
                 ),
-                pedido.getDetalles()
+                (pedido.getDetalles() == null
+                        ? Collections.<com.utp.RestoControl.Entity.DetallePedido>emptyList()
+                        : pedido.getDetalles())
                         .stream()
+                        .filter(detalle -> !Boolean.TRUE.equals(detalle.getEliminado()))
                         .map(
                                 DetallePedidoResponse::from
                         )
