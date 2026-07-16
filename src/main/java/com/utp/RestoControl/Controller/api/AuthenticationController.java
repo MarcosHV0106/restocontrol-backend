@@ -25,10 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationController.class);
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -82,24 +86,33 @@ public class AuthenticationController {
                             : "SIN_ROL"
             ));
 
+            LOGGER.info(
+                    "Autenticacion resultado=EXITO usuarioId={} rol={}",
+                    usuario.getIdUsuario(),
+                    usuario.getRol() == null ? "SIN_ROL" : usuario.getRol().getNombreRol()
+            );
+
             return ResponseEntity.ok(response);
 
         } catch (BadCredentialsException e) {
+            LOGGER.warn("Autenticacion resultado=FALLO tipo=BAD_CREDENTIALS");
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Correo o contraseña incorrectos");
             return ResponseEntity.badRequest().body(response);
 
         } catch (AuthenticationException e) {
+            LOGGER.warn("Autenticacion resultado=FALLO tipo={}", e.getClass().getSimpleName());
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", e.getMessage());
+            response.put("message", "No se pudo iniciar sesion");
             return ResponseEntity.badRequest().body(response);
 
         } catch (Exception e) {
+            LOGGER.error("Autenticacion resultado=ERROR tipo={}", e.getClass().getSimpleName(), e);
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", e.getMessage());
+            response.put("message", "Ocurrio un error interno al iniciar sesion");
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -125,6 +138,7 @@ public class AuthenticationController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Logout exitoso (Recuerde eliminar el token en el cliente)");
+        LOGGER.info("Cierre de sesion resultado=EXITO");
         return ResponseEntity.ok(response);
     }
 
@@ -185,17 +199,20 @@ public class AuthenticationController {
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Contraseña actualizada correctamente");
+            LOGGER.info("Cambio de contrasena resultado=EXITO usuarioId={}", usuario.getIdUsuario());
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException e) {
+            LOGGER.warn("Cambio de contrasena resultado=FALLO tipo={}", e.getClass().getSimpleName());
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
+            LOGGER.error("Cambio de contrasena resultado=ERROR tipo={}", e.getClass().getSimpleName(), e);
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", "Error al cambiar contraseña: " + e.getMessage());
+            response.put("message", "Ocurrio un error interno al cambiar la contrasena");
             return ResponseEntity.internalServerError().body(response);
         }
     }
