@@ -162,22 +162,6 @@ public class PedidoService {
         return pedidoRepository.save(pedido);
     }
 
-    @Transactional
-    public Pedido cobrar(Integer idPedido) {
-        Pedido pedido = buscarPedidoActivo(idPedido);
-        verificarAcceso(pedido);
-        validarEditable(pedido);
-
-        pedido.setEstadoPedido(estadoPedidoService.buscarPorId(ESTADO_PEDIDO_PAGADO));
-        pedido.setFechaPago(LocalDateTime.now());
-        if (pedido.getMetodoPago() == null || pedido.getMetodoPago().isBlank()) {
-            pedido.setMetodoPago("NO_REGISTRADO");
-        }
-
-        mesaService.actualizarEstado(pedido.getIdMesa().getIdMesa(), ESTADO_MESA_LIBRE);
-        return pedidoRepository.save(pedido);
-    }
-
     private Pedido buscarPedidoActivo(Integer idPedido) {
         Preconditions.checkArgument(idPedido != null, "El pedido es obligatorio.");
         return pedidoRepository.findByIdPedidoAndEliminadoFalse(idPedido)

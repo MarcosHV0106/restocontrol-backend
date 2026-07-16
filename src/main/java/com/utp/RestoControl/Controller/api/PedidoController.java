@@ -87,15 +87,4 @@ public class PedidoController {
         );
     }
 
-    @PutMapping("/{idPedido}/cobrar")
-    public ResponseEntity<PedidoResponse> cobrar(
-            @PathVariable Integer idPedido) {
-
-        return ResponseEntity.ok(
-                PedidoResponse.from(
-                        service.cobrar(idPedido)
-                )
-        );
-    }
-
 }
