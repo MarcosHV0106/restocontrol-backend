@@ -13,12 +13,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AlimentoRepository
         extends JpaRepository<Alimento, Integer> {
 
-    @EntityGraph(attributePaths = "categoria")
+    @EntityGraph(attributePaths = {"categoria", "receta.insumo"})
     List<Alimento> findByEliminadoFalse();
 
-    @EntityGraph(attributePaths = "categoria")
+    @EntityGraph(attributePaths = {"categoria", "receta.insumo"})
     List<Alimento> findByCategoria_IdCategoriaAndEliminadoFalse(Integer idCategoria);
 
-    @EntityGraph(attributePaths = "categoria")
+    @EntityGraph(attributePaths = {"categoria", "receta.insumo"})
     Optional<Alimento> findByIdAlimentoAndEliminadoFalse(Integer idAlimento);
 }

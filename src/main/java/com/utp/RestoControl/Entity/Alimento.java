@@ -1,9 +1,12 @@
 package com.utp.RestoControl.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "alimentos", indexes = {
@@ -55,4 +58,8 @@ public class Alimento {
                 nullable = false)
 
     private CategoriaAlimento categoria;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "alimento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecetaAlimento> receta = new ArrayList<>();
 }

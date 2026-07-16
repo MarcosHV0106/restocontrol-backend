@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,10 @@ public class Insumo {
     
     @Column(name = "stock_minimo")
     private Double stockMinimo;
+
+    @Column(name = "costo_unitario", nullable = false, precision = 12, scale = 4,
+            columnDefinition = "DECIMAL(12,4) DEFAULT 0.0000")
+    private BigDecimal costoUnitario = BigDecimal.ZERO;
     
     
     

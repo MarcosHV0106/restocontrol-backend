@@ -41,6 +41,12 @@ public class Pedido {
     @Column(name = "observacion", length = 250)
     private String observacion;
 
+    @Column(name = "fecha_pago")
+    private LocalDateTime fechaPago;
+
+    @Column(name = "metodo_pago", length = 30)
+    private String metodoPago;
+
     @Column(nullable = false)
     private Boolean eliminado = false;
 
