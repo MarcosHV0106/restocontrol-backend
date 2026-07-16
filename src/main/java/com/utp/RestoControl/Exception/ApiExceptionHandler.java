@@ -56,6 +56,11 @@ public class ApiExceptionHandler {
         );
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiError> manejarConflictoDeNegocio(ConflictException exception) {
+        return construirRespuestaEsperada(exception, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiError> manejarErrorInterno(IllegalStateException exception) {
         LOGGER.error("Error interno controlado tipo={}", exception.getClass().getSimpleName(), exception);

@@ -96,6 +96,48 @@ public interface PedidoRepository
             """)
     List<Pedido> findPendientesDeCobroPorUsuario(@Param("idUsuario") Integer idUsuario);
 
+    @Query("""
+            select distinct p
+            from Pedido p
+            join fetch p.idMesa m
+            join fetch m.estadoMesa
+            join fetch p.usuario u
+            join fetch u.rol
+            join fetch p.estadoPedido ep
+            join fetch p.modalidadPedido
+            left join fetch p.detalles d
+            left join fetch d.idAlimento a
+            left join fetch a.categoria
+            where p.eliminado = false
+            and (
+                upper(ep.nombreEstado) in (
+                    'PENDIENTE', 'RECIBIDO', 'EN PREPARACION',
+                    'EN PREPARACIÓN', 'PREPARANDO', 'LISTO'
+                )
+                or (
+                    upper(ep.nombreEstado) = 'ENTREGADO'
+                    and p.fechaEntregado >= :desdeEntregados
+                )
+            )
+            order by p.fechaPedido asc
+            """)
+    List<Pedido> findParaCocina(@Param("desdeEntregados") LocalDateTime desdeEntregados);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @EntityGraph(attributePaths = {
+        "idMesa.estadoMesa",
+        "usuario.rol",
+        "estadoPedido",
+        "modalidadPedido",
+        "detalles.idAlimento.categoria"
+    })
+    @Query("""
+            select p from Pedido p
+            where p.idPedido = :idPedido
+            and p.eliminado = false
+            """)
+    Optional<Pedido> findActivoParaCocina(@Param("idPedido") Integer idPedido);
+
     @EntityGraph(attributePaths = {
             "idMesa.estadoMesa",
             "usuario.rol",
