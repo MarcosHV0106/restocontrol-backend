@@ -263,6 +263,12 @@ public class PedidoService {
                 estadoPagado
         );
 
+        pedido.setFechaPago(LocalDateTime.now());
+
+        if (pedido.getMetodoPago() == null || pedido.getMetodoPago().isBlank()) {
+            pedido.setMetodoPago("NO_REGISTRADO");
+        }
+
         Mesa mesa = pedido.getIdMesa();
 
         mesaService.actualizarEstado(

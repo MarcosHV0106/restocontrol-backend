@@ -13,6 +13,7 @@ public class AlimentoResponse {
     private String nombreAlimento;
     private String descripcion;
     private BigDecimal precio;
+    private BigDecimal costoReceta;
     private Boolean disponible;
     private CategoriaResponse categoria;
 
@@ -22,8 +23,22 @@ public class AlimentoResponse {
                 alimento.getNombreAlimento(),
                 alimento.getDescripcion(),
                 alimento.getPrecio(),
+                calcularCostoReceta(alimento),
                 alimento.getDisponible(),
                 CategoriaResponse.from(alimento.getCategoria())
         );
+    }
+
+    private static BigDecimal calcularCostoReceta(Alimento alimento) {
+        if (alimento.getReceta() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        return alimento.getReceta().stream()
+                .filter(detalle -> detalle.getCantidad() != null
+                        && detalle.getInsumo() != null
+                        && detalle.getInsumo().getCostoUnitario() != null)
+                .map(detalle -> detalle.getCantidad().multiply(detalle.getInsumo().getCostoUnitario()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

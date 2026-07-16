@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -45,6 +46,11 @@ public class SecurityConfig {
                         // Nota: Al usar hasAnyRole, NO pongas el prefijo "ROLE_" aquí,
                         // Spring lo añade automáticamente por ti.
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/reportes/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/alimentos/*/receta").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/alimentos/*/receta").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/insumos", "/api/insumos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/insumos", "/api/insumos/**").hasRole("ADMIN")
                         .requestMatchers("/api/pedidos", "/api/pedidos/**").hasAnyRole("MESERO", "ADMIN", "COCINA")
                         .requestMatchers("/api/mesas/**").hasAnyRole("MESERO", "ADMIN")
                         .requestMatchers("/api/alimentos/**", "/api/categorias/**").hasAnyRole("ADMIN", "MESERO")

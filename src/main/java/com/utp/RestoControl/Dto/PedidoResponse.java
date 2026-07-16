@@ -19,6 +19,10 @@ public class PedidoResponse {
 
     private String observacion;
 
+    private LocalDateTime fechaPago;
+
+    private String metodoPago;
+
     private MesaResponse mesa;
 
     private UsuarioResponse usuario;
@@ -37,6 +41,8 @@ public class PedidoResponse {
                 pedido.getFechaPedido(),
                 pedido.getTotal(),
                 pedido.getObservacion(),
+                pedido.getFechaPago(),
+                pedido.getMetodoPago(),
                 MesaResponse.from(
                         pedido.getIdMesa()
                 ),
