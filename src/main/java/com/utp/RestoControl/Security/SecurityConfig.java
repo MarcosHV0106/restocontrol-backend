@@ -43,42 +43,40 @@ public class SecurityConfig {
         http
                 // CSRF se deshabilita porque JWT no es vulnerable a CSRF de la misma forma que las cookies
                 .csrf(csrf -> csrf.disable())
-
                 // Autorización de rutas modificada a Autoridades directas
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/login", "/api/auth/registro", "/api/auth/activaciones/**").permitAll()
-                        // Nota: Al usar hasAnyRole, NO pongas el prefijo "ROLE_" aquí,
-                        // Spring lo añade automáticamente por ti.
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/reportes/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/alimentos/*/receta").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/alimentos/*/receta").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/insumos", "/api/insumos/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/insumos", "/api/insumos/**").hasRole("ADMIN")
-                        .requestMatchers("/api/cobros", "/api/cobros/**").hasAnyRole("ADMIN", "MESERO", "CAJERO")
-                        .requestMatchers("/api/cocina", "/api/cocina/**").hasRole("COCINERO")
-                        .requestMatchers("/api/pedidos", "/api/pedidos/**").hasAnyRole("MESERO", "ADMIN")
-                        .requestMatchers("/api/mesas/**").hasAnyRole("MESERO", "ADMIN")
-                        .requestMatchers("/api/alimentos/**", "/api/categorias/**").hasAnyRole("ADMIN", "MESERO")
-                        .anyRequest().authenticated()
+                .requestMatchers("/api/auth/login", "/api/auth/registro", "/api/auth/activaciones/**").permitAll()
+                // Nota: Al usar hasAnyRole, NO pongas el prefijo "ROLE_" aquí,
+                // Spring lo añade automáticamente por ti.
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/reportes/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/alimentos/*/receta").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/alimentos/*/receta").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/insumos", "/api/insumos/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/insumos", "/api/insumos/**").hasRole("ADMIN")
+                .requestMatchers("/api/cobros", "/api/cobros/**").hasAnyRole("ADMIN", "MESERO", "CAJERO")
+                .requestMatchers("/api/cocina", "/api/cocina/**").hasRole("COCINERO")
+                .requestMatchers("/api/pedidos", "/api/pedidos/**").hasAnyRole("MESERO", "ADMIN")
+                .requestMatchers("/api/insumos", "/api/insumos/**").hasAnyRole("MESERO", "ADMIN", "COCINA")
+                .requestMatchers("/api/alimento-insumo", "/api/alimento-insumo/**").hasAnyRole("MESERO", "ADMIN", "COCINA")
+                .requestMatchers("/api/mesas/**").hasAnyRole("MESERO", "ADMIN")
+                .requestMatchers("/api/alimentos/**", "/api/categorias/**").hasAnyRole("ADMIN", "MESERO")
+                .anyRequest().authenticated()
                 )
-
                 // IMPORTANTE: Cambiamos la política de creación de sesiones a STATELESS
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
                 // CORS (Se mantiene igual para permitir que Vue se conecte)
                 .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:5173"));
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    config.setAllowedHeaders(List.of("*"));
-                    config.setExposedHeaders(List.of(requestIdHeader));
-                    config.setAllowCredentials(true);
-                    return config;
-                }))
-
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:5173"));
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            config.setAllowedHeaders(List.of("*"));
+            config.setExposedHeaders(List.of(requestIdHeader));
+            config.setAllowCredentials(true);
+            return config;
+        }))
                 // IMPORTANTE: Añadimos el filtro JWT antes del filtro de autenticación estándar
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

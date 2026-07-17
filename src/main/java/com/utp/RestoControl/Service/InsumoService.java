@@ -3,61 +3,65 @@ package com.utp.RestoControl.Service;
 
 import com.utp.RestoControl.Entity.Insumo;
 import com.utp.RestoControl.Repository.InsumoRepository;
-import com.utp.RestoControl.Exception.ResourceNotFoundException;
-import com.google.common.base.Preconditions;
-import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class InsumoService {
-    
+
     private final InsumoRepository repository;
-    
-    @Transactional(readOnly = true)
-    public List<Insumo> listar(){
-        return repository.findAll();
+
+    public List<Insumo> listar() {
+        return repository.findByEliminadoFalse();
     }
-    @Transactional
-    public Insumo guardar(Insumo insumo){
-        validar(insumo);
-        if (insumo.getCostoUnitario() == null) {
-            insumo.setCostoUnitario(BigDecimal.ZERO);
+
+    public Insumo guardar(Insumo insumo) {
+
+        if (insumo.getEliminado() == null) {
+            insumo.setEliminado(false);
         }
+
         return repository.save(insumo);
     }
 
-    @Transactional(readOnly = true)
     public Insumo buscarPorId(Integer id) {
-        return repository.findByIdInsumo(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Insumo no encontrado."));
+        return repository
+                .findByIdInsumoAndEliminadoFalse(id)
+                .orElse(null);
     }
 
-    @Transactional
-    public Insumo actualizar(Integer id, Insumo request) {
-        validar(request);
-        Insumo insumo = buscarPorId(id);
-        insumo.setNombreInsumo(request.getNombreInsumo().trim());
-        insumo.setUnidadMedida(request.getUnidadMedida().trim());
-        insumo.setStockActual(request.getStockActual());
-        insumo.setStockMinimo(request.getStockMinimo());
-        insumo.setCostoUnitario(request.getCostoUnitario() == null
-                ? BigDecimal.ZERO
-                : request.getCostoUnitario());
-        return repository.save(insumo);
+    public Insumo actualizar(Integer id, Insumo insumo) {
+
+        Insumo existente = repository
+                .findByIdInsumoAndEliminadoFalse(id)
+                .orElse(null);
+
+        if (existente == null) {
+            return null;
+        }
+
+        existente.setNombreInsumo(insumo.getNombreInsumo());
+        existente.setDescripcion(insumo.getDescripcion());
+        existente.setUnidadMedida(insumo.getUnidadMedida());
+        existente.setStockActual(insumo.getStockActual());
+        existente.setStockMinimo(insumo.getStockMinimo());
+        existente.setCostoUnitario(insumo.getCostoUnitario());
+        existente.setFechaVencimiento(insumo.getFechaVencimiento());
+
+        return repository.save(existente);
     }
 
-    private void validar(Insumo insumo) {
-        Preconditions.checkArgument(insumo != null, "El insumo es obligatorio.");
-        Preconditions.checkArgument(insumo.getNombreInsumo() != null
-                && !insumo.getNombreInsumo().trim().isEmpty(), "El nombre del insumo es obligatorio.");
-        Preconditions.checkArgument(insumo.getUnidadMedida() != null
-                && !insumo.getUnidadMedida().trim().isEmpty(), "La unidad de medida es obligatoria.");
-        Preconditions.checkArgument(insumo.getCostoUnitario() == null
-                || insumo.getCostoUnitario().compareTo(BigDecimal.ZERO) >= 0,
-                "El costo unitario no puede ser negativo.");
+    public void eliminar(Integer id) {
+
+        Insumo insumo = repository
+                .findByIdInsumoAndEliminadoFalse(id)
+                .orElseThrow(() -> new RuntimeException("Insumo no encontrado"));
+
+        insumo.setEliminado(true);
+
+        repository.save(insumo);
+
     }
 }
