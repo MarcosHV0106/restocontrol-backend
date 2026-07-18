@@ -2,6 +2,7 @@
 package com.utp.RestoControl.Service;
 
 import com.utp.RestoControl.Entity.MovimientoInventario;
+import com.utp.RestoControl.Exception.ConflictException;
 import com.utp.RestoControl.Repository.MovimientoInventarioRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +15,11 @@ public class MovimientoInventarioService {
     private final MovimientoInventarioRepository repository;
     
     public List<MovimientoInventario> listar(){
-        return repository.findAll();
+        return repository.findByEliminadoFalseOrderByFechaMovimientoDesc();
     }
     public MovimientoInventario guardar(MovimientoInventario movimientoInventario){
-        return repository.save(movimientoInventario);
+        throw new ConflictException(
+                "Los movimientos se registran desde los lotes para mantener el stock sincronizado"
+        );
     }
 }

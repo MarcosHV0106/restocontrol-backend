@@ -2,6 +2,7 @@ package com.utp.RestoControl.Controller.api;
 
 import com.utp.RestoControl.Entity.Insumo;
 import com.utp.RestoControl.Service.InsumoService;
+import com.utp.RestoControl.Service.AlertaInventarioService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class InsumoController {
 
     private final InsumoService service;
+    private final AlertaInventarioService alertaService;
 
     @GetMapping
     public ResponseEntity<List<Insumo>> listar() {
@@ -30,8 +32,9 @@ public class InsumoController {
 
     @PostMapping
     public ResponseEntity<Insumo> guardar(@RequestBody Insumo insumo) {
-
-        return ResponseEntity.ok(service.guardar(insumo));
+        Insumo guardado = service.guardar(insumo);
+        alertaService.sincronizar();
+        return ResponseEntity.ok(guardado);
     }
 
     @GetMapping("/{id}")
@@ -42,12 +45,14 @@ public class InsumoController {
     @PutMapping("/{id}")
     public Insumo actualizar(@PathVariable Integer id,
             @RequestBody Insumo insumo) {
-
-        return service.actualizar(id, insumo);
+        Insumo actualizado = service.actualizar(id, insumo);
+        alertaService.sincronizar();
+        return actualizado;
     }
 
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Integer id) {
         service.eliminar(id);
+        alertaService.sincronizar();
     }
 }
