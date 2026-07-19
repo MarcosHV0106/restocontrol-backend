@@ -36,11 +36,11 @@ public class Insumo {
     @Column(name = "unidad_medida", length = 30, nullable = false)
     private String unidadMedida;
 
-    @Column(name = "stock_actual")
-    private Double stockActual;
+    @Column(name = "stock_actual", precision = 12, scale = 4)
+    private BigDecimal stockActual;
 
-    @Column(name = "stock_minimo")
-    private Double stockMinimo;
+    @Column(name = "stock_minimo", precision = 12, scale = 4)
+    private BigDecimal stockMinimo;
 
     @Column(name = "costo_unitario")
     private BigDecimal costoUnitario;

@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,8 +31,8 @@ public class MovimientoInventario {
     @Column(name = "tipo_movimiento",length = 30)
     private String tipoMovimiento;
     
-    @Column(name = "cantidad")
-    private Double cantidad;
+    @Column(name = "cantidad", precision = 12, scale = 4)
+    private BigDecimal cantidad;
     
     @Column(name = "motivo",length = 150)
     private String motivo;
@@ -42,11 +43,19 @@ public class MovimientoInventario {
     @Column(name = "referencia",length = 100)
     private String referencia;
     
-   @ManyToOne
-   @JoinColumn(name = "id_insumo",
+    @ManyToOne
+    @JoinColumn(name = "id_insumo",
                 nullable = false)
     private Insumo insumo;
-    
-    
-    
+
+    @ManyToOne
+    @JoinColumn(name = "id_lote")
+    private LoteInsumo lote;
+
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
+
+    @Column(nullable = false)
+    private Boolean eliminado = false;
 }

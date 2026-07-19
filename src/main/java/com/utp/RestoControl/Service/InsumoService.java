@@ -4,6 +4,7 @@ package com.utp.RestoControl.Service;
 import com.utp.RestoControl.Entity.Insumo;
 import com.utp.RestoControl.Repository.InsumoRepository;
 import java.util.List;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,8 @@ public class InsumoService {
     }
 
     public Insumo guardar(Insumo insumo) {
-
+        insumo.setStockActual(BigDecimal.ZERO);
+        insumo.setFechaVencimiento(null);
         if (insumo.getEliminado() == null) {
             insumo.setEliminado(false);
         }
@@ -45,10 +47,8 @@ public class InsumoService {
         existente.setNombreInsumo(insumo.getNombreInsumo());
         existente.setDescripcion(insumo.getDescripcion());
         existente.setUnidadMedida(insumo.getUnidadMedida());
-        existente.setStockActual(insumo.getStockActual());
         existente.setStockMinimo(insumo.getStockMinimo());
         existente.setCostoUnitario(insumo.getCostoUnitario());
-        existente.setFechaVencimiento(insumo.getFechaVencimiento());
 
         return repository.save(existente);
     }
