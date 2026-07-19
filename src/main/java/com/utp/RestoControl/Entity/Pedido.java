@@ -53,6 +53,9 @@ public class Pedido {
     @Column(name = "fecha_entregado")
     private LocalDateTime fechaEntregado;
 
+    @Column(name = "fecha_consumo_inventario")
+    private LocalDateTime fechaConsumoInventario;
+
     @Column(name = "metodo_pago", length = 30)
     private String metodoPago;
 

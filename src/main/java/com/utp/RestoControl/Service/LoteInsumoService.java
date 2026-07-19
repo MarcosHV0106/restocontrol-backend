@@ -54,6 +54,8 @@ public class LoteInsumoService {
                 "La cantidad del lote debe ser mayor a cero.");
         Preconditions.checkArgument(request.getFechaVencimiento() != null,
                 "La fecha de vencimiento del lote es obligatoria.");
+        Preconditions.checkArgument(!request.getFechaVencimiento().isBefore(LocalDate.now(ZONA_LIMA)),
+                "No se puede registrar un lote vencido.");
 
         Insumo insumo = buscarInsumo(idInsumo);
         LoteInsumo lote = new LoteInsumo();
@@ -131,7 +133,9 @@ public class LoteInsumoService {
         BigDecimal total = loteRepository
                 .findByInsumo_IdInsumoAndEliminadoFalseOrderByFechaVencimientoAsc(insumo.getIdInsumo())
                 .stream()
-                .filter(lote -> !"RETIRADO".equals(lote.getEstado()))
+                .filter(lote -> "ACTIVO".equals(lote.getEstado()))
+                .filter(lote -> lote.getFechaVencimiento() == null
+                        || !lote.getFechaVencimiento().isBefore(LocalDate.now(ZONA_LIMA)))
                 .map(LoteInsumo::getCantidadActual)
                 .filter(cantidad -> cantidad != null && cantidad.compareTo(BigDecimal.ZERO) > 0)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

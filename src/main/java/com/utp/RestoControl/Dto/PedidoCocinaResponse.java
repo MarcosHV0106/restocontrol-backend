@@ -19,6 +19,7 @@ public class PedidoCocinaResponse {
     private Integer numeroMesa;
     private String responsable;
     private LocalDateTime fechaPedido;
+    private LocalDateTime fechaConsumoInventario;
     private LocalDateTime fechaInicioPreparacion;
     private LocalDateTime fechaListo;
     private LocalDateTime fechaEntregado;
@@ -41,6 +42,7 @@ public class PedidoCocinaResponse {
                 pedido.getIdMesa().getNumeroMesa(),
                 nombreCompleto(pedido.getUsuario()),
                 pedido.getFechaPedido(),
+                pedido.getFechaConsumoInventario(),
                 pedido.getFechaInicioPreparacion(),
                 pedido.getFechaListo(),
                 pedido.getFechaEntregado(),
