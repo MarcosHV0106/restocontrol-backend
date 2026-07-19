@@ -50,6 +50,8 @@ public class SecurityConfig {
                 // Spring lo añade automáticamente por ti.
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/reportes/**").hasRole("ADMIN")
+                .requestMatchers("/api/estimaciones-diarias", "/api/estimaciones-diarias/**")
+                .hasAnyRole("ADMIN", "ALMACENERO")
                 .requestMatchers(HttpMethod.GET, "/api/alimentos/*/receta").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/alimentos/*/receta").hasRole("ADMIN")
                 .requestMatchers("/api/alertas", "/api/alertas/**", "/api/lotes", "/api/lotes/**")
