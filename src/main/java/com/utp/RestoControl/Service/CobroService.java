@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class CobroService {
 
     private static final Integer ESTADO_PEDIDO_PAGADO = 4;
-    private static final Integer ESTADO_MESA_LIBRE = 1;
     private static final BigDecimal FACTOR_IGV = new BigDecimal("1.18");
     private static final Set<String> METODOS_PERMITIDOS = Set.of(
             "EFECTIVO",
@@ -158,7 +157,9 @@ public class CobroService {
         pedido.setFechaPago(fechaCobro);
         pedido.setMetodoPago(resolverMetodoPagoPedido(datosPagos));
         pedidoRepository.save(pedido);
-        mesaService.actualizarEstado(pedido.getIdMesa().getIdMesa(), ESTADO_MESA_LIBRE);
+        if (pedido.getIdMesa() != null) {
+            mesaService.liberar(pedido.getIdMesa().getIdMesa());
+        }
 
         return cobro;
     }
@@ -302,6 +303,10 @@ public class CobroService {
                 || Set.of("PAGADO", "COBRADO", "CANCELADO").contains(estado));
 
         Preconditions.checkState(!cerrado, "El pedido ya esta cerrado y no puede cobrarse.");
+        Preconditions.checkState(
+                pedido.getFechaSolicitudCuenta() != null,
+                "El pedido aun no fue enviado a Caja."
+        );
         Preconditions.checkState(
                 !cobroRepository.existsByPedido_IdPedidoAndEliminadoFalse(pedido.getIdPedido()),
                 "El pedido ya tiene un cobro registrado."

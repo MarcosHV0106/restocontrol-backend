@@ -40,6 +40,10 @@ public class CocinaService {
         Pedido pedido = pedidoRepository.findActivoParaCocina(idPedido)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado."));
 
+        if (pedido.getFechaEnvioCocina() == null) {
+            throw new ConflictException("El pedido aun no fue enviado a Cocina.");
+        }
+
         EstadoCocina actual = EstadoCocina.desdePersistencia(
                 pedido.getEstadoPedido() == null ? null : pedido.getEstadoPedido().getNombreEstado()
         );

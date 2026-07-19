@@ -43,7 +43,9 @@ public class CobroResponse {
         return new CobroResponse(
                 cobro.getIdCobro(),
                 cobro.getPedido().getIdPedido(),
-                cobro.getPedido().getIdMesa().getNumeroMesa(),
+                cobro.getPedido().getIdMesa() == null
+                        ? null
+                        : cobro.getPedido().getIdMesa().getNumeroMesa(),
                 cobro.getFechaCobro(),
                 cobro.getSubtotal(),
                 cobro.getIgv(),

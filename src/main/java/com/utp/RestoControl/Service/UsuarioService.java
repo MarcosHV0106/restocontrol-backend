@@ -54,6 +54,23 @@ public class UsuarioService {
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
     }
 
+    @Transactional(readOnly = true)
+    public List<Usuario> listarResponsablesDePedidos() {
+        return repository.findByEliminadoFalse().stream()
+                .filter(usuario -> Boolean.TRUE.equals(usuario.getDisponible()))
+                .filter(usuario -> !Boolean.TRUE.equals(usuario.getPendiente()))
+                .filter(usuario -> usuario.getRol() != null)
+                .filter(usuario -> {
+                    String rol = usuario.getRol().getNombreRol();
+                    return rol != null && (
+                            "MESERO".equalsIgnoreCase(rol.trim())
+                            || "ADMIN".equalsIgnoreCase(rol.trim())
+                            || "ADMINISTRADOR".equalsIgnoreCase(rol.trim())
+                    );
+                })
+                .toList();
+    }
+
     @Transactional
     public Usuario guardar(UsuarioRequest request) {
         validarRequestCreacion(request);
