@@ -17,6 +17,7 @@ public class PedidoCocinaResponse {
 
     private Integer idPedido;
     private Integer numeroMesa;
+    private String clienteNombre;
     private String responsable;
     private LocalDateTime fechaPedido;
     private LocalDateTime fechaConsumoInventario;
@@ -39,7 +40,8 @@ public class PedidoCocinaResponse {
 
         return new PedidoCocinaResponse(
                 pedido.getIdPedido(),
-                pedido.getIdMesa().getNumeroMesa(),
+                pedido.getIdMesa() == null ? null : pedido.getIdMesa().getNumeroMesa(),
+                pedido.getClienteNombre(),
                 nombreCompleto(pedido.getUsuario()),
                 pedido.getFechaPedido(),
                 pedido.getFechaConsumoInventario(),

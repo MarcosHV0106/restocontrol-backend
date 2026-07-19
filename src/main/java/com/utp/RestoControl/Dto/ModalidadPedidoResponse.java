@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ModalidadPedidoResponse {
 
-    private Integer idModalidaPedido;
+    private Integer idModalidadPedido;
 
     private String nombreModalidad;
 

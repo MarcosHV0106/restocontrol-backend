@@ -105,7 +105,7 @@ class CobroServiceTests {
         assertSame(pagado, pedido.getEstadoPedido());
         assertEquals("B001-00000100", cobro.getPagos().get(0).getNumeroComprobante());
         assertEquals("B001-00000101", cobro.getPagos().get(1).getNumeroComprobante());
-        verify(mesaService).actualizarEstado(5, 1);
+        verify(mesaService).liberar(5);
     }
 
     @Test
@@ -189,6 +189,22 @@ class CobroServiceTests {
         verify(pedidoRepository, never()).findPendientesDeCobroConRelaciones();
     }
 
+    @Test
+    void rechazaCobroSiLaCuentaNoFueSolicitada() {
+        autenticar(3, "CAJERO");
+        Pedido pedido = pedidoPendiente(10, 7, "90.00");
+        pedido.setFechaSolicitudCuenta(null);
+        when(pedidoRepository.findActivoParaCobro(10)).thenReturn(Optional.of(pedido));
+
+        CobroRequest request = new CobroRequest(
+                BigDecimal.ZERO,
+                List.of(pago("TARJETA", "90.00", null, "BOLETA", null, null))
+        );
+
+        assertThrows(IllegalStateException.class, () -> cobroService.procesarCobro(10, request));
+        verify(cobroRepository, never()).save(any());
+    }
+
     private Pedido pedidoPendiente(Integer idPedido, Integer idCreador, String total) {
         Mesa mesa = new Mesa();
         mesa.setIdMesa(5);
@@ -200,6 +216,7 @@ class CobroServiceTests {
         pedido.setIdMesa(mesa);
         pedido.setTotal(new BigDecimal(total));
         pedido.setEstadoPedido(new EstadoPedido(1, "PENDIENTE", false));
+        pedido.setFechaSolicitudCuenta(java.time.LocalDateTime.now());
         pedido.setEliminado(false);
         return pedido;
     }

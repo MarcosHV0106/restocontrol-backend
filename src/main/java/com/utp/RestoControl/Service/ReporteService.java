@@ -156,7 +156,7 @@ public class ReporteService {
                         pedido.getIdPedido(),
                         "T-%04d".formatted(pedido.getIdPedido()),
                         fechaVenta(pedido),
-                        pedido.getIdMesa().getNumeroMesa(),
+                        pedido.getIdMesa() == null ? null : pedido.getIdMesa().getNumeroMesa(),
                         "Público general",
                         normalizarMetodoPago(pedido.getMetodoPago()),
                         moneda(valor(pedido.getTotal()))))

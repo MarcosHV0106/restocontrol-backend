@@ -10,6 +10,7 @@ import com.utp.RestoControl.Repository.MesaRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -144,15 +145,76 @@ public class MesaService {
 
     @Transactional
     public void actualizarEstado(Integer idMesa, Integer idEstadoMesa) {
+        Mesa mesa = bloquearMesas(List.of(idMesa)).get(0);
+        EstadoMesa estado = estadoMesaService.buscarPorId(idEstadoMesa);
+        mesa.setEstadoMesa(estado);
+        repository.save(mesa);
+    }
 
-    Mesa mesa = buscarPorId(idMesa);
+    @Transactional
+    public Mesa ocuparParaPedido(Integer idMesa) {
+        Preconditions.checkArgument(idMesa != null, "La mesa es obligatoria para pedidos en salon.");
+        Mesa mesa = bloquearMesas(List.of(idMesa)).get(0);
+        Integer estadoActual = mesa.getEstadoMesa() == null
+                ? null
+                : mesa.getEstadoMesa().getIdEstadoMesa();
+        Preconditions.checkState(
+                ESTADO_LIBRE.equals(estadoActual) || ESTADO_RESERVADA.equals(estadoActual),
+                "La mesa seleccionada ya no esta disponible."
+        );
+        mesa.setEstadoMesa(estadoMesaService.buscarPorId(ESTADO_OCUPADA));
+        return repository.save(mesa);
+    }
 
-    EstadoMesa estado = estadoMesaService.buscarPorId(idEstadoMesa);
+    @Transactional
+    public Mesa transferirPedido(Integer idMesaOrigen, Integer idMesaDestino, boolean cuentaSolicitada) {
+        Preconditions.checkArgument(idMesaOrigen != null, "La mesa actual es obligatoria.");
+        Preconditions.checkArgument(idMesaDestino != null, "La mesa destino es obligatoria.");
+        Preconditions.checkArgument(!Objects.equals(idMesaOrigen, idMesaDestino), "Selecciona una mesa diferente.");
 
-    mesa.setEstadoMesa(estado);
+        List<Mesa> mesas = bloquearMesas(List.of(idMesaOrigen, idMesaDestino));
+        Preconditions.checkState(mesas.size() == 2, "No se encontro una de las mesas indicadas.");
+        Mesa origen = mesas.stream()
+                .filter(mesa -> idMesaOrigen.equals(mesa.getIdMesa()))
+                .findFirst()
+                .orElseThrow();
+        Mesa destino = mesas.stream()
+                .filter(mesa -> idMesaDestino.equals(mesa.getIdMesa()))
+                .findFirst()
+                .orElseThrow();
 
-    repository.save(mesa);
-}
+        Integer estadoDestino = destino.getEstadoMesa() == null
+                ? null
+                : destino.getEstadoMesa().getIdEstadoMesa();
+        Preconditions.checkState(
+                ESTADO_LIBRE.equals(estadoDestino) || ESTADO_RESERVADA.equals(estadoDestino),
+                "La mesa destino ya no esta disponible."
+        );
+
+        origen.setEstadoMesa(estadoMesaService.buscarPorId(ESTADO_LIBRE));
+        destino.setEstadoMesa(estadoMesaService.buscarPorId(
+                cuentaSolicitada ? ESTADO_COBRAR : ESTADO_OCUPADA
+        ));
+        repository.saveAll(List.of(origen, destino));
+        return destino;
+    }
+
+    @Transactional
+    public void liberar(Integer idMesa) {
+        if (idMesa == null) {
+            return;
+        }
+        Mesa mesa = bloquearMesas(List.of(idMesa)).get(0);
+        mesa.setEstadoMesa(estadoMesaService.buscarPorId(ESTADO_LIBRE));
+        repository.save(mesa);
+    }
+
+    private List<Mesa> bloquearMesas(List<Integer> idsMesa) {
+        List<Integer> ids = idsMesa.stream().filter(Objects::nonNull).distinct().sorted().toList();
+        List<Mesa> mesas = repository.findActivasParaActualizar(ids);
+        Preconditions.checkState(mesas.size() == ids.size(), "Mesa no encontrada.");
+        return mesas;
+    }
 
     private void validarMesa(
             MesaRequest mesa,

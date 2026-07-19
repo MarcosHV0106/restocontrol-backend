@@ -56,6 +56,27 @@ public class Pedido {
     @Column(name = "fecha_consumo_inventario")
     private LocalDateTime fechaConsumoInventario;
 
+    @Column(name = "fecha_envio_cocina")
+    private LocalDateTime fechaEnvioCocina;
+
+    @Column(name = "fecha_solicitud_cuenta")
+    private LocalDateTime fechaSolicitudCuenta;
+
+    @Column(name = "fecha_cancelacion")
+    private LocalDateTime fechaCancelacion;
+
+    @Column(name = "motivo_cancelacion", length = 200)
+    private String motivoCancelacion;
+
+    @Column(name = "cliente_nombre", length = 120)
+    private String clienteNombre;
+
+    @Column(name = "cliente_telefono", length = 20)
+    private String clienteTelefono;
+
+    @Column(name = "direccion_entrega", length = 250)
+    private String direccionEntrega;
+
     @Column(name = "metodo_pago", length = 30)
     private String metodoPago;
 
@@ -69,7 +90,7 @@ public class Pedido {
 
     @ManyToOne
     @JoinColumn(name = "id_mesa",
-            nullable = false)
+            nullable = true)
     private Mesa idMesa;
 
     @ManyToOne

@@ -15,6 +15,7 @@ import com.utp.RestoControl.Repository.EstadoPedidoRepository;
 import com.utp.RestoControl.Repository.PedidoRepository;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -120,10 +121,21 @@ class CocinaServiceTests {
         verify(consumoInventarioService, never()).consumirParaPedido(any(Pedido.class));
     }
 
+    @Test
+    void rechazaPedidoQueSigueEnBorrador() {
+        Pedido pedido = pedidoConEstado(recibido);
+        pedido.setFechaEnvioCocina(null);
+        when(pedidoRepository.findActivoParaCocina(10)).thenReturn(Optional.of(pedido));
+
+        assertThrows(ConflictException.class, () -> cocinaService.actualizarEstado(10, "EN_PREPARACION"));
+        verify(consumoInventarioService, never()).consumirParaPedido(any(Pedido.class));
+    }
+
     private Pedido pedidoConEstado(EstadoPedido estado) {
         Pedido pedido = new Pedido();
         pedido.setIdPedido(10);
         pedido.setEstadoPedido(estado);
+        pedido.setFechaEnvioCocina(LocalDateTime.now().minusMinutes(2));
         pedido.setEliminado(false);
         return pedido;
     }

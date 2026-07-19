@@ -17,8 +17,8 @@ public interface PedidoRepository
     @Query("""
             select distinct p
             from Pedido p
-            join fetch p.idMesa m
-            join fetch m.estadoMesa
+            left join fetch p.idMesa m
+            left join fetch m.estadoMesa
             join fetch p.usuario u
             join fetch u.rol
             join fetch p.estadoPedido
@@ -34,8 +34,8 @@ public interface PedidoRepository
     @Query("""
             select distinct p
             from Pedido p
-            join fetch p.idMesa m
-            join fetch m.estadoMesa
+            left join fetch p.idMesa m
+            left join fetch m.estadoMesa
             join fetch p.usuario u
             join fetch u.rol
             join fetch p.estadoPedido
@@ -52,8 +52,8 @@ public interface PedidoRepository
     @Query("""
             select distinct p
             from Pedido p
-            join fetch p.idMesa m
-            join fetch m.estadoMesa
+            left join fetch p.idMesa m
+            left join fetch m.estadoMesa
             join fetch p.usuario u
             join fetch u.rol
             join fetch p.estadoPedido ep
@@ -62,6 +62,7 @@ public interface PedidoRepository
             left join fetch d.idAlimento a
             left join fetch a.categoria
             where p.eliminado = false
+            and p.fechaSolicitudCuenta is not null
             and ep.idEstadoPedido <> 4
             and upper(ep.nombreEstado) not in ('PAGADO', 'COBRADO', 'CANCELADO')
             and not exists (
@@ -75,8 +76,8 @@ public interface PedidoRepository
     @Query("""
             select distinct p
             from Pedido p
-            join fetch p.idMesa m
-            join fetch m.estadoMesa
+            left join fetch p.idMesa m
+            left join fetch m.estadoMesa
             join fetch p.usuario u
             join fetch u.rol
             join fetch p.estadoPedido ep
@@ -86,6 +87,7 @@ public interface PedidoRepository
             left join fetch a.categoria
             where p.eliminado = false
             and u.idUsuario = :idUsuario
+            and p.fechaSolicitudCuenta is not null
             and ep.idEstadoPedido <> 4
             and upper(ep.nombreEstado) not in ('PAGADO', 'COBRADO', 'CANCELADO')
             and not exists (
@@ -99,8 +101,8 @@ public interface PedidoRepository
     @Query("""
             select distinct p
             from Pedido p
-            join fetch p.idMesa m
-            join fetch m.estadoMesa
+            left join fetch p.idMesa m
+            left join fetch m.estadoMesa
             join fetch p.usuario u
             join fetch u.rol
             join fetch p.estadoPedido ep
@@ -109,6 +111,7 @@ public interface PedidoRepository
             left join fetch d.idAlimento a
             left join fetch a.categoria
             where p.eliminado = false
+            and p.fechaEnvioCocina is not null
             and (
                 upper(ep.nombreEstado) in (
                     'PENDIENTE', 'RECIBIDO', 'EN PREPARACION',
@@ -137,6 +140,21 @@ public interface PedidoRepository
             and p.eliminado = false
             """)
     Optional<Pedido> findActivoParaCocina(@Param("idPedido") Integer idPedido);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @EntityGraph(attributePaths = {
+        "idMesa.estadoMesa",
+        "usuario.rol",
+        "estadoPedido",
+        "modalidadPedido",
+        "detalles.idAlimento.categoria"
+    })
+    @Query("""
+            select p from Pedido p
+            where p.idPedido = :idPedido
+            and p.eliminado = false
+            """)
+    Optional<Pedido> findActivoParaGestion(@Param("idPedido") Integer idPedido);
 
     @EntityGraph(attributePaths = {
             "idMesa.estadoMesa",
@@ -186,33 +204,45 @@ public interface PedidoRepository
     );
 
     @EntityGraph(attributePaths = {
-            "idMesa.estadoMesa",
-            "usuario.rol",
-            "estadoPedido",
-            "modalidadPedido",
-            "detalles.idAlimento.categoria"
+        "idMesa.estadoMesa",
+        "usuario.rol",
+        "estadoPedido",
+        "modalidadPedido",
+        "detalles.idAlimento.categoria"
     })
-    Optional<Pedido> findTopByIdMesa_IdMesaAndEstadoPedido_IdEstadoPedidoNotAndEliminadoFalseOrderByIdPedidoDesc(
-        Integer idMesa,
-        Integer idEstadoPedido
-    );
+    @Query("""
+            select p from Pedido p
+            join p.estadoPedido ep
+            where p.idMesa.idMesa = :idMesa
+            and p.eliminado = false
+            and ep.idEstadoPedido <> 4
+            and upper(ep.nombreEstado) not in ('PAGADO', 'COBRADO', 'CANCELADO')
+            and not exists (
+                select c.idCobro from Cobro c
+                where c.pedido.idPedido = p.idPedido and c.eliminado = false
+            )
+            order by p.idPedido desc
+            """)
+    List<Pedido> findActivosPorMesa(@Param("idMesa") Integer idMesa);
 
     @Query("""
             select distinct p
             from Pedido p
             join fetch p.idMesa m
-            join fetch p.estadoPedido
+            join fetch p.estadoPedido ep
             left join fetch p.detalles d
             left join fetch d.idAlimento a
             left join fetch a.categoria
             where p.eliminado = false
             and m.idMesa in :idsMesa
             and p.estadoPedido.idEstadoPedido <> :idEstadoPedidoExcluido
+            and upper(ep.nombreEstado) not in ('PAGADO', 'COBRADO', 'CANCELADO')
             and p.idPedido in (
                 select max(p2.idPedido)
                 from Pedido p2
                 where p2.eliminado = false
                 and p2.estadoPedido.idEstadoPedido <> :idEstadoPedidoExcluido
+                and upper(p2.estadoPedido.nombreEstado) not in ('PAGADO', 'COBRADO', 'CANCELADO')
                 and p2.idMesa.idMesa in :idsMesa
                 group by p2.idMesa.idMesa
             )
@@ -227,19 +257,21 @@ public interface PedidoRepository
             from Pedido p
             join fetch p.idMesa m
             join fetch p.usuario u
-            join fetch p.estadoPedido
+            join fetch p.estadoPedido ep
             left join fetch p.detalles d
             left join fetch d.idAlimento a
             left join fetch a.categoria
             where p.eliminado = false
             and m.idMesa in :idsMesa
             and p.estadoPedido.idEstadoPedido <> :idEstadoPedidoExcluido
+            and upper(ep.nombreEstado) not in ('PAGADO', 'COBRADO', 'CANCELADO')
             and u.idUsuario = :idUsuario
             and p.idPedido in (
                 select max(p2.idPedido)
                 from Pedido p2
                 where p2.eliminado = false
                 and p2.estadoPedido.idEstadoPedido <> :idEstadoPedidoExcluido
+                and upper(p2.estadoPedido.nombreEstado) not in ('PAGADO', 'COBRADO', 'CANCELADO')
                 and p2.idMesa.idMesa in :idsMesa
                 group by p2.idMesa.idMesa
             )
@@ -253,7 +285,7 @@ public interface PedidoRepository
     @Query("""
             select distinct p
             from Pedido p
-            join fetch p.idMesa
+            left join fetch p.idMesa
             join fetch p.usuario u
             join fetch u.rol
             join fetch p.estadoPedido ep

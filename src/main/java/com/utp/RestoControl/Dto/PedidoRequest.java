@@ -22,6 +22,23 @@ public class PedidoRequest {
 
     private String observacion;
 
+    private String clienteNombre;
+
+    private String clienteTelefono;
+
+    private String direccionEntrega;
+
     private List<DetallePedidoRequest> detalles;
+
+    public PedidoRequest(
+            Integer idMesa,
+            Integer idUsuario,
+            Integer idModalidadPedido,
+            Integer idEstadoPedido,
+            String observacion,
+            List<DetallePedidoRequest> detalles
+    ) {
+        this(idMesa, idUsuario, idModalidadPedido, idEstadoPedido, observacion, null, null, null, detalles);
+    }
 
 }
