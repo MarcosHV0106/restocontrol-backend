@@ -56,6 +56,10 @@ public class MovimientoInventario {
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "id_pedido")
+    private Pedido pedido;
+
     @Column(nullable = false)
     private Boolean eliminado = false;
 }

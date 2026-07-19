@@ -1,9 +1,8 @@
 
 package com.utp.RestoControl.Controller.api;
 
-import com.utp.RestoControl.Entity.EstadoPedido;
+import com.utp.RestoControl.Dto.MovimientoInventarioResponse;
 import com.utp.RestoControl.Entity.MovimientoInventario;
-import com.utp.RestoControl.Service.EstadoPedidoService;
 import com.utp.RestoControl.Service.MovimientoInventarioService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +20,10 @@ public class MovimientoInventarioController {
     private final MovimientoInventarioService service;
     
     @GetMapping
-    public List<MovimientoInventario> listar(){
-        return service.listar();
+    public List<MovimientoInventarioResponse> listar(){
+        return service.listar().stream()
+                .map(MovimientoInventarioResponse::from)
+                .toList();
     }
     
     @PostMapping

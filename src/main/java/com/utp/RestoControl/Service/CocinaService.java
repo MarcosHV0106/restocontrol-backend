@@ -23,6 +23,7 @@ public class CocinaService {
 
     private final PedidoRepository pedidoRepository;
     private final EstadoPedidoRepository estadoPedidoRepository;
+    private final ConsumoInventarioService consumoInventarioService;
 
     @Transactional(readOnly = true)
     public List<Pedido> listarPedidos() {
@@ -47,6 +48,10 @@ public class CocinaService {
             throw new ConflictException(
                     "El pedido cambio de estado. Actualiza el tablero antes de continuar."
             );
+        }
+
+        if (pedido.getFechaConsumoInventario() == null) {
+            consumoInventarioService.consumirParaPedido(pedido);
         }
 
         LocalDateTime ahora = LocalDateTime.now();

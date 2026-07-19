@@ -31,6 +31,9 @@ class CocinaServiceTests {
     @Mock
     private EstadoPedidoRepository estadoPedidoRepository;
 
+    @Mock
+    private ConsumoInventarioService consumoInventarioService;
+
     @InjectMocks
     private CocinaService cocinaService;
 
@@ -58,6 +61,7 @@ class CocinaServiceTests {
 
         assertSame(preparacion, resultado.getEstadoPedido());
         assertNotNull(resultado.getFechaInicioPreparacion());
+        verify(consumoInventarioService).consumirParaPedido(pedido);
         verify(pedidoRepository).save(pedido);
     }
 
@@ -100,6 +104,20 @@ class CocinaServiceTests {
         );
 
         verify(pedidoRepository, never()).save(any(Pedido.class));
+        verify(consumoInventarioService, never()).consumirParaPedido(any(Pedido.class));
+    }
+
+    @Test
+    void noRepiteElConsumoSiElPedidoYaDescontoInventario() {
+        Pedido pedido = pedidoConEstado(preparacion);
+        pedido.setFechaConsumoInventario(java.time.LocalDateTime.now());
+        when(pedidoRepository.findActivoParaCocina(10)).thenReturn(Optional.of(pedido));
+        when(estadoPedidoRepository.findByEliminadoFalse()).thenReturn(List.of(listo));
+        when(pedidoRepository.save(pedido)).thenReturn(pedido);
+
+        cocinaService.actualizarEstado(10, "LISTO");
+
+        verify(consumoInventarioService, never()).consumirParaPedido(any(Pedido.class));
     }
 
     private Pedido pedidoConEstado(EstadoPedido estado) {
