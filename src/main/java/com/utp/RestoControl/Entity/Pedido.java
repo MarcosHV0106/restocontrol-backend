@@ -14,7 +14,8 @@ import java.util.List;
     @Index(name = "idx_pedidos_mesa_estado_eliminado", columnList = "id_mesa, id_estado_pedido, eliminado"),
     @Index(name = "idx_pedidos_usuario_eliminado", columnList = "id_usuario, eliminado"),
     @Index(name = "idx_pedidos_mesa_id", columnList = "id_mesa, id_pedido"),
-    @Index(name = "idx_pedidos_consumo_eliminado", columnList = "fecha_consumo_inventario, eliminado")
+    @Index(name = "idx_pedidos_consumo_eliminado", columnList = "fecha_consumo_inventario, eliminado"),
+    @Index(name = "idx_pedidos_cancelacion_eliminado", columnList = "fecha_cancelacion, eliminado")
 })
 
 @Getter

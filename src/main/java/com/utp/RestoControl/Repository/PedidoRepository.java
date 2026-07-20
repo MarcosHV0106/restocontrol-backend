@@ -303,4 +303,23 @@ public interface PedidoRepository
             @Param("desde") LocalDateTime desde,
             @Param("hastaExclusiva") LocalDateTime hastaExclusiva
     );
+
+    @Query("""
+            select p
+            from Pedido p
+            left join fetch p.idMesa
+            join fetch p.usuario u
+            join fetch u.rol
+            join fetch p.estadoPedido ep
+            join fetch p.modalidadPedido
+            where p.eliminado = false
+            and upper(ep.nombreEstado) = 'CANCELADO'
+            and coalesce(p.fechaCancelacion, p.fechaPedido) >= :desde
+            and coalesce(p.fechaCancelacion, p.fechaPedido) < :hastaExclusiva
+            order by coalesce(p.fechaCancelacion, p.fechaPedido) desc
+            """)
+    List<Pedido> findCanceladosParaReporte(
+            @Param("desde") LocalDateTime desde,
+            @Param("hastaExclusiva") LocalDateTime hastaExclusiva
+    );
 }
