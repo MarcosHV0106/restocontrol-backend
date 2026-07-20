@@ -10,12 +10,14 @@ import com.utp.RestoControl.Entity.RecetaAlimento;
 import com.utp.RestoControl.Entity.Usuario;
 import com.utp.RestoControl.Exception.ConflictException;
 import com.utp.RestoControl.Repository.AlimentoRepository;
+import com.utp.RestoControl.Repository.DetallePedidoRepository;
 import com.utp.RestoControl.Repository.EstimacionDiariaRepository;
 import com.utp.RestoControl.Repository.UsuarioRepository;
 import com.utp.RestoControl.Security.UserPrincipal;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,12 +44,14 @@ public class EstimacionDiariaService {
 
     private final EstimacionDiariaRepository estimacionRepository;
     private final AlimentoRepository alimentoRepository;
+    private final DetallePedidoRepository detallePedidoRepository;
     private final UsuarioRepository usuarioRepository;
 
     @Transactional(readOnly = true)
     public EstimacionDiariaResponse consultar(LocalDate fecha) {
         validarFechaObligatoria(fecha);
-        return construirRespuesta(fecha, cargarPorcionesGuardadas(fecha));
+        PlanGuardado plan = cargarPlanGuardado(fecha);
+        return construirRespuesta(fecha, plan.porciones(), plan.datos());
     }
 
     @Transactional(readOnly = true)
@@ -58,7 +62,7 @@ public class EstimacionDiariaService {
         validarFechaGuardado(fecha);
         Map<Integer, Alimento> alimentos = cargarAlimentos();
         Map<Integer, Integer> porciones = validarSolicitudes(solicitudes, alimentos);
-        return construirRespuesta(fecha, porciones);
+        return construirRespuesta(fecha, porciones, cargarPlanGuardado(fecha).datos());
     }
 
     @Transactional
@@ -69,10 +73,14 @@ public class EstimacionDiariaService {
         validarFechaGuardado(fecha);
         Map<Integer, Alimento> alimentos = cargarAlimentos();
         Map<Integer, Integer> porcionesSolicitadas = validarSolicitudes(solicitudes, alimentos);
-        EstimacionDiariaResponse validacion = construirRespuesta(fecha, porcionesSolicitadas);
-        if (!validacion.factible()) {
+        EstimacionDiariaResponse validacion = construirRespuesta(
+                fecha,
+                porcionesSolicitadas,
+                DatosGuardado.vacio()
+        );
+        if (!validacion.guardable()) {
             throw new ConflictException(
-                    "La estimacion no puede guardarse: revisa las recetas y los insumos faltantes."
+                    "La estimacion no puede guardarse: retira los platos sin receta o configura sus insumos."
             );
         }
 
@@ -120,7 +128,13 @@ public class EstimacionDiariaService {
 
         estimacionRepository.saveAll(cambios);
         estimacionRepository.flush();
-        return construirRespuesta(fecha, porcionesSolicitadas);
+        boolean guardada = porcionesSolicitadas.values().stream().anyMatch(porciones -> porciones > 0);
+        DatosGuardado datosGuardados = new DatosGuardado(
+                guardada,
+                guardada ? nombreCompleto(usuario) : null,
+                guardada ? LocalDateTime.now(ZONA_LIMA) : null
+        );
+        return construirRespuesta(fecha, porcionesSolicitadas, datosGuardados);
     }
 
     private Map<Integer, Alimento> cargarAlimentos() {
@@ -164,39 +178,53 @@ public class EstimacionDiariaService {
         return porcionesSolicitadas;
     }
 
-    private Map<Integer, Integer> cargarPorcionesGuardadas(LocalDate fecha) {
-        return estimacionRepository.findByFechaAndEliminadoFalse(fecha).stream()
+    private PlanGuardado cargarPlanGuardado(LocalDate fecha) {
+        List<EstimacionDiaria> estimaciones = estimacionRepository.findByFechaAndEliminadoFalse(fecha);
+        Map<Integer, Integer> porciones = estimaciones.stream()
                 .collect(HashMap::new,
                         (mapa, estimacion) -> mapa.put(
                                 estimacion.getAlimento().getIdAlimento(), estimacion.getPorciones()),
                         HashMap::putAll);
+        EstimacionDiaria ultima = estimaciones.stream()
+                .max(Comparator.comparing(
+                        EstimacionDiaria::getFechaActualizacion,
+                        Comparator.nullsFirst(Comparator.naturalOrder())))
+                .orElse(null);
+        DatosGuardado datos = ultima == null
+                ? DatosGuardado.vacio()
+                : new DatosGuardado(
+                        true,
+                        nombreCompleto(ultima.getUsuario()),
+                        ultima.getFechaActualizacion()
+                );
+        return new PlanGuardado(porciones, datos);
     }
 
     private EstimacionDiariaResponse construirRespuesta(
             LocalDate fecha,
-            Map<Integer, Integer> porciones
+            Map<Integer, Integer> porciones,
+            DatosGuardado datosGuardado
     ) {
         List<Alimento> alimentos = alimentoRepository.findByEliminadoFalse().stream()
                 .filter(alimento -> Boolean.TRUE.equals(alimento.getDisponible()))
                 .sorted(Comparator.comparing(Alimento::getNombreAlimento, String.CASE_INSENSITIVE_ORDER))
                 .toList();
+        Map<Integer, Integer> porcionesProcesadas = cargarPorcionesProcesadas(fecha);
         Map<Integer, AcumuladoInsumo> requerimientos = new LinkedHashMap<>();
         Map<Integer, Boolean> recetaValida = new HashMap<>();
         Map<Integer, Set<Integer>> insumosPorAlimento = new HashMap<>();
 
         for (Alimento alimento : alimentos) {
             int cantidadPorciones = porciones.getOrDefault(alimento.getIdAlimento(), 0);
-            if (cantidadPorciones <= 0) {
-                recetaValida.put(alimento.getIdAlimento(), true);
-                continue;
-            }
+            int procesadas = porcionesProcesadas.getOrDefault(alimento.getIdAlimento(), 0);
+            int pendientes = Math.max(cantidadPorciones - procesadas, 0);
 
             List<RecetaAlimento> receta = alimento.getReceta() == null
                     ? List.of()
                     : alimento.getReceta();
             boolean valida = !receta.isEmpty() && receta.stream().allMatch(this::ingredienteValido);
             recetaValida.put(alimento.getIdAlimento(), valida);
-            if (!valida) {
+            if (pendientes <= 0 || !valida) {
                 continue;
             }
 
@@ -204,7 +232,7 @@ public class EstimacionDiariaService {
             for (RecetaAlimento ingrediente : receta) {
                 Insumo insumo = ingrediente.getInsumo();
                 BigDecimal requerido = ingrediente.getCantidad()
-                        .multiply(BigDecimal.valueOf(cantidadPorciones));
+                        .multiply(BigDecimal.valueOf(pendientes));
                 AcumuladoInsumo acumulado = requerimientos.computeIfAbsent(
                         insumo.getIdInsumo(),
                         id -> new AcumuladoInsumo(insumo)
@@ -241,20 +269,36 @@ public class EstimacionDiariaService {
                 .map(alimento -> construirPlato(
                         alimento,
                         porciones.getOrDefault(alimento.getIdAlimento(), 0),
-                        recetaValida.getOrDefault(alimento.getIdAlimento(), true),
+                        porcionesProcesadas.getOrDefault(alimento.getIdAlimento(), 0),
+                        recetaValida.getOrDefault(alimento.getIdAlimento(), false),
                         insumosPorAlimento.getOrDefault(alimento.getIdAlimento(), Set.of()),
                         faltantes
                 ))
                 .toList();
         int totalPorciones = platos.stream().mapToInt(EstimacionDiariaResponse.PlatoEstimado::porciones).sum();
-        boolean factible = platos.stream()
+        int totalProcesadas = platos.stream()
+                .mapToInt(EstimacionDiariaResponse.PlatoEstimado::porcionesProcesadas)
+                .sum();
+        int totalPendientes = platos.stream()
+                .mapToInt(EstimacionDiariaResponse.PlatoEstimado::porcionesPendientes)
+                .sum();
+        boolean guardable = platos.stream()
                 .filter(plato -> plato.porciones() > 0)
+                .allMatch(EstimacionDiariaResponse.PlatoEstimado::planificable);
+        boolean factible = guardable && platos.stream()
+                .filter(plato -> plato.porcionesPendientes() > 0)
                 .allMatch(plato -> "SUFICIENTE".equals(plato.estado()));
 
         return new EstimacionDiariaResponse(
                 fecha,
+                datosGuardado.guardada(),
+                guardable,
                 factible,
                 totalPorciones,
+                totalProcesadas,
+                totalPendientes,
+                datosGuardado.responsable(),
+                datosGuardado.fechaActualizacion(),
                 platos,
                 resumenInsumos
         );
@@ -263,18 +307,30 @@ public class EstimacionDiariaService {
     private EstimacionDiariaResponse.PlatoEstimado construirPlato(
             Alimento alimento,
             int porciones,
+            int porcionesProcesadas,
             boolean recetaValida,
             Set<Integer> idsInsumo,
             Map<Integer, BigDecimal> faltantes
     ) {
+        int porcionesPendientes = Math.max(porciones - porcionesProcesadas, 0);
         String estado;
         String detalle;
-        if (porciones <= 0) {
+        if (!recetaValida) {
+            estado = "SIN_RECETA";
+            detalle = "Plato heredado no planificable: configura una receta valida.";
+        } else if (porciones <= 0 && porcionesProcesadas > 0) {
+            estado = "SUPERADA";
+            detalle = "Ya se procesaron %d porciones sin una meta vigente."
+                    .formatted(porcionesProcesadas);
+        } else if (porciones <= 0) {
             estado = "SIN_PLANIFICAR";
             detalle = "Define las porciones a preparar.";
-        } else if (!recetaValida) {
-            estado = "SIN_RECETA";
-            detalle = "Configura una receta valida antes de planificar este plato.";
+        } else if (porcionesPendientes <= 0) {
+            estado = porcionesProcesadas > porciones ? "SUPERADA" : "COMPLETADA";
+            detalle = porcionesProcesadas > porciones
+                    ? "La operacion supero la meta en %d porciones."
+                            .formatted(porcionesProcesadas - porciones)
+                    : "La meta diaria ya fue procesada por Cocina.";
         } else {
             List<String> insumosFaltantes = idsInsumo.stream()
                     .filter(id -> faltantes.getOrDefault(id, BigDecimal.ZERO)
@@ -284,10 +340,14 @@ public class EstimacionDiariaService {
                     .toList();
             if (insumosFaltantes.isEmpty()) {
                 estado = "SUFICIENTE";
-                detalle = "Los insumos cubren la planificacion del dia.";
+                detalle = porcionesProcesadas > 0
+                        ? "Stock suficiente para %d pendientes; %d ya procesadas."
+                                .formatted(porcionesPendientes, porcionesProcesadas)
+                        : "Los insumos cubren la planificacion del dia.";
             } else {
                 estado = "INSUFICIENTE";
-                detalle = "Falta " + String.join(", ", insumosFaltantes) + ".";
+                detalle = "Para las %d porciones pendientes falta %s."
+                        .formatted(porcionesPendientes, String.join(", ", insumosFaltantes));
             }
         }
 
@@ -295,7 +355,10 @@ public class EstimacionDiariaService {
                 alimento.getIdAlimento(),
                 alimento.getNombreAlimento(),
                 alimento.getCategoria() == null ? "Sin categoria" : alimento.getCategoria().getNombreCategoria(),
+                recetaValida,
                 porciones,
+                porcionesProcesadas,
+                porcionesPendientes,
                 estado,
                 detalle
         );
@@ -323,6 +386,35 @@ public class EstimacionDiariaService {
                 && ingrediente.getCantidad().compareTo(BigDecimal.ZERO) > 0
                 && ingrediente.getInsumo() != null
                 && !Boolean.TRUE.equals(ingrediente.getInsumo().getEliminado());
+    }
+
+    private Map<Integer, Integer> cargarPorcionesProcesadas(LocalDate fecha) {
+        LocalDateTime desde = fecha.atStartOfDay();
+        LocalDateTime hastaExclusiva = fecha.plusDays(1).atStartOfDay();
+        Map<Integer, Integer> procesadas = new HashMap<>();
+        detallePedidoRepository.sumarCantidadesProcesadas(desde, hastaExclusiva)
+                .forEach(fila -> procesadas.put(
+                        fila.getIdAlimento(),
+                        enteroSeguro(fila.getCantidad())
+                ));
+        return procesadas;
+    }
+
+    private int enteroSeguro(Long valor) {
+        if (valor == null || valor <= 0) {
+            return 0;
+        }
+        return valor > Integer.MAX_VALUE ? Integer.MAX_VALUE : valor.intValue();
+    }
+
+    private String nombreCompleto(Usuario usuario) {
+        if (usuario == null) {
+            return null;
+        }
+        String nombre = usuario.getNombre() == null ? "" : usuario.getNombre().trim();
+        String apellido = usuario.getApellido() == null ? "" : usuario.getApellido().trim();
+        String completo = (nombre + " " + apellido).trim();
+        return completo.isBlank() ? null : completo;
     }
 
     private void validarFechaObligatoria(LocalDate fecha) {
@@ -359,5 +451,21 @@ public class EstimacionDiariaService {
         private AcumuladoInsumo(Insumo insumo) {
             this.insumo = insumo;
         }
+    }
+
+    private record DatosGuardado(
+            boolean guardada,
+            String responsable,
+            LocalDateTime fechaActualizacion
+    ) {
+        private static DatosGuardado vacio() {
+            return new DatosGuardado(false, null, null);
+        }
+    }
+
+    private record PlanGuardado(
+            Map<Integer, Integer> porciones,
+            DatosGuardado datos
+    ) {
     }
 }

@@ -5,8 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +21,7 @@ import com.utp.RestoControl.Entity.RecetaAlimento;
 import com.utp.RestoControl.Entity.Usuario;
 import com.utp.RestoControl.Exception.ConflictException;
 import com.utp.RestoControl.Repository.AlimentoRepository;
+import com.utp.RestoControl.Repository.DetallePedidoRepository;
 import com.utp.RestoControl.Repository.EstimacionDiariaRepository;
 import com.utp.RestoControl.Repository.UsuarioRepository;
 import com.utp.RestoControl.Security.UserPrincipal;
@@ -45,6 +47,8 @@ class EstimacionDiariaServiceTests {
     private EstimacionDiariaRepository estimacionRepository;
     @Mock
     private AlimentoRepository alimentoRepository;
+    @Mock
+    private DetallePedidoRepository detallePedidoRepository;
     @Mock
     private UsuarioRepository usuarioRepository;
 
@@ -72,6 +76,7 @@ class EstimacionDiariaServiceTests {
         );
 
         assertFalse(respuesta.factible());
+        assertTrue(respuesta.guardable());
         assertEquals(2, respuesta.totalPorciones());
         assertEquals(2, respuesta.platos().stream()
                 .filter(plato -> "INSUFICIENTE".equals(plato.estado())).count());
@@ -115,18 +120,73 @@ class EstimacionDiariaServiceTests {
     }
 
     @Test
-    void noPersisteUnaEstimacionConInsumosInsuficientes() {
+    void persisteLaDemandaAunqueRequieraAbastecimiento() {
+        LocalDate fecha = LocalDate.now();
         Insumo pollo = insumo(1, "Pollo", "kg", "1");
         Alimento plato = alimento(1, "Pollo a la plancha", pollo, "2");
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(7);
+        usuario.setNombre("Maria");
+        usuario.setApellido("Almacen");
         when(alimentoRepository.findByEliminadoFalse()).thenReturn(List.of(plato));
+        when(estimacionRepository.findByFecha(fecha)).thenReturn(List.of());
+        when(usuarioRepository.findByIdUsuarioAndEliminadoFalse(7)).thenReturn(Optional.of(usuario));
+        autenticar(7, "ALMACENERO");
 
-        assertThrows(ConflictException.class, () -> service.guardar(
-                LocalDate.now(),
+        EstimacionDiariaResponse respuesta = service.guardar(
+                fecha,
                 List.of(new EstimacionDiariaItemRequest(1, 1))
+        );
+
+        assertTrue(respuesta.guardada());
+        assertTrue(respuesta.guardable());
+        assertFalse(respuesta.factible());
+        assertEquals("Maria Almacen", respuesta.responsable());
+        verify(estimacionRepository).saveAll(anyList());
+    }
+
+    @Test
+    void descuentaDelPlanLasPorcionesYaProcesadasPorCocina() {
+        LocalDate fecha = LocalDate.now();
+        Insumo pollo = insumo(1, "Pollo", "kg", "10");
+        Alimento plato = alimento(1, "Pollo a la plancha", pollo, "2");
+        DetallePedidoRepository.CantidadProcesadaPorAlimento consumo =
+                mock(DetallePedidoRepository.CantidadProcesadaPorAlimento.class);
+        when(consumo.getIdAlimento()).thenReturn(1);
+        when(consumo.getCantidad()).thenReturn(2L);
+        when(alimentoRepository.findByEliminadoFalse()).thenReturn(List.of(plato));
+        when(detallePedidoRepository.sumarCantidadesProcesadas(any(), any()))
+                .thenReturn(List.of(consumo));
+
+        EstimacionDiariaResponse respuesta = service.validar(
+                fecha,
+                List.of(new EstimacionDiariaItemRequest(1, 5))
+        );
+
+        assertTrue(respuesta.factible());
+        assertEquals(2, respuesta.porcionesProcesadas());
+        assertEquals(3, respuesta.porcionesPendientes());
+        assertDecimal("6", respuesta.insumos().getFirst().cantidadRequerida());
+        assertEquals(2, respuesta.platos().getFirst().porcionesProcesadas());
+        assertEquals(3, respuesta.platos().getFirst().porcionesPendientes());
+    }
+
+    @Test
+    void impideGuardarUnPlatoHeredadoSinReceta() {
+        Alimento legado = new Alimento();
+        legado.setIdAlimento(1);
+        legado.setNombreAlimento("Plato heredado");
+        legado.setDisponible(true);
+        legado.setEliminado(false);
+        legado.setReceta(List.of());
+        when(alimentoRepository.findByEliminadoFalse()).thenReturn(List.of(legado));
+
+        ConflictException error = assertThrows(ConflictException.class, () -> service.guardar(
+                LocalDate.now(),
+                List.of(new EstimacionDiariaItemRequest(1, 10))
         ));
 
-        verify(estimacionRepository, never()).saveAll(anyList());
-        verify(usuarioRepository, never()).findByIdUsuarioAndEliminadoFalse(7);
+        assertTrue(error.getMessage().contains("sin receta"));
     }
 
     private Alimento alimento(
