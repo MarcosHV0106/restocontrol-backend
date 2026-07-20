@@ -180,6 +180,22 @@ class ConsumoInventarioServiceTests {
         verifyNoInteractions(recetaRepository, loteRepository);
     }
 
+    @Test
+    void impideEnviarACocinaUnPlatoNotificadoComoAgotado() {
+        Alimento alimento = alimento(5, "Plato agotado");
+        alimento.setDisponible(true);
+        alimento.setBloqueadoCocina(true);
+        Pedido pedido = pedido(13, detalle(alimento, 1));
+
+        ConflictException error = assertThrows(
+                ConflictException.class,
+                () -> service.validarDisponibilidadParaPedido(pedido)
+        );
+
+        assertTrue(error.getMessage().contains("Plato agotado"));
+        verifyNoInteractions(recetaRepository, loteRepository);
+    }
+
     private Pedido pedido(Integer id, DetallePedido... detalles) {
         Pedido pedido = new Pedido();
         pedido.setIdPedido(id);

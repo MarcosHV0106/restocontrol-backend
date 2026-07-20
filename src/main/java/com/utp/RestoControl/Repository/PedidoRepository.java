@@ -126,6 +126,37 @@ public interface PedidoRepository
             """)
     List<Pedido> findParaCocina(@Param("desdeEntregados") LocalDateTime desdeEntregados);
 
+    @Query("""
+            select distinct p
+            from Pedido p
+            left join fetch p.idMesa
+            join fetch p.usuario u
+            join fetch u.rol
+            join fetch p.estadoPedido
+            join fetch p.modalidadPedido
+            left join fetch p.detalles d
+            left join fetch d.idAlimento a
+            left join fetch a.categoria
+            where p.eliminado = false
+            and p.fechaEntregado >= :desde
+            and p.fechaEntregado < :hasta
+            order by p.fechaEntregado desc
+            """)
+    List<Pedido> findHistorialCocina(
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta
+    );
+
+    @EntityGraph(attributePaths = {"detalles"})
+    @Query("""
+            select distinct p from Pedido p
+            where p.eliminado = false
+            and p.fechaInicioPreparacion is not null
+            and p.fechaListo is not null
+            and p.fechaListo >= :desde
+            """)
+    List<Pedido> findPreparadosParaEstimacion(@Param("desde") LocalDateTime desde);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @EntityGraph(attributePaths = {
         "idMesa.estadoMesa",

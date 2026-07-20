@@ -50,6 +50,28 @@ class AlimentoResponseTests {
         assertEquals(5, response.getPorcionesDisponibles());
     }
 
+    @Test
+    void elBloqueoDeCocinaImpideVenderAunqueExistaInventario() {
+        Alimento alimento = alimentoBase();
+        Insumo insumo = new Insumo();
+        insumo.setStockActual(new BigDecimal("10"));
+        insumo.setEliminado(false);
+        RecetaAlimento receta = new RecetaAlimento();
+        receta.setAlimento(alimento);
+        receta.setInsumo(insumo);
+        receta.setCantidad(new BigDecimal("2"));
+        alimento.setReceta(List.of(receta));
+        alimento.setBloqueadoCocina(true);
+        alimento.setMotivoBloqueoCocina("Horno fuera de servicio");
+
+        AlimentoResponse response = AlimentoResponse.from(alimento);
+
+        assertTrue(response.getInventarioSuficiente());
+        assertFalse(response.getDisponibleParaPedidos());
+        assertEquals(5, response.getPorcionesDisponibles());
+        assertEquals("Cocina notifico: Horno fuera de servicio", response.getMotivoNoDisponible());
+    }
+
     private Alimento alimentoBase() {
         CategoriaAlimento categoria = new CategoriaAlimento();
         categoria.setIdCategoria(1);

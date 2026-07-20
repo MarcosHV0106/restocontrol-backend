@@ -5,13 +5,15 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "alimentos", indexes = {
     @Index(name = "idx_alimentos_categoria_eliminado", columnList = "id_categoria, eliminado"),
-    @Index(name = "idx_alimentos_eliminado_disponible", columnList = "eliminado, disponible")
+    @Index(name = "idx_alimentos_eliminado_disponible", columnList = "eliminado, disponible"),
+    @Index(name = "idx_alimentos_bloqueo_cocina", columnList = "bloqueado_cocina, eliminado")
 })
 
 @Getter
@@ -44,6 +46,19 @@ public class Alimento {
 
     @Column(nullable = false)
     private Boolean disponible = true;
+
+    @Column(name = "bloqueado_cocina", nullable = false)
+    private Boolean bloqueadoCocina = false;
+
+    @Column(name = "motivo_bloqueo_cocina", length = 200)
+    private String motivoBloqueoCocina;
+
+    @Column(name = "fecha_bloqueo_cocina")
+    private LocalDateTime fechaBloqueoCocina;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario_bloqueo_cocina")
+    private Usuario usuarioBloqueoCocina;
 
     @Column(nullable = false)
     private Boolean eliminado = false;

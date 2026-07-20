@@ -27,9 +27,15 @@ public class PedidoCocinaResponse {
     private String estado;
     private String modalidad;
     private String observacion;
+    private Integer tiempoEstimadoMinutos;
+    private LocalDateTime fechaEstimadaLista;
     private List<DetallePedidoCocinaResponse> detalles;
 
     public static PedidoCocinaResponse from(Pedido pedido) {
+        return from(pedido, null);
+    }
+
+    public static PedidoCocinaResponse from(Pedido pedido, Integer tiempoEstimadoMinutos) {
         List<DetallePedidoCocinaResponse> detalles = (pedido.getDetalles() == null
                 ? Collections.<DetallePedido>emptyList()
                 : pedido.getDetalles())
@@ -51,8 +57,22 @@ public class PedidoCocinaResponse {
                 estadoCanonico(pedido),
                 pedido.getModalidadPedido().getNombreModalidad(),
                 pedido.getObservacion(),
+                tiempoEstimadoMinutos,
+                fechaEstimadaLista(pedido, tiempoEstimadoMinutos),
                 detalles
         );
+    }
+
+    private static LocalDateTime fechaEstimadaLista(Pedido pedido, Integer tiempoEstimadoMinutos) {
+        if (tiempoEstimadoMinutos == null || pedido.getFechaListo() != null) {
+            return pedido.getFechaListo();
+        }
+        LocalDateTime inicio = pedido.getFechaInicioPreparacion() != null
+                ? pedido.getFechaInicioPreparacion()
+                : pedido.getFechaEnvioCocina() != null
+                        ? pedido.getFechaEnvioCocina()
+                        : pedido.getFechaPedido();
+        return inicio == null ? null : inicio.plusMinutes(tiempoEstimadoMinutos);
     }
 
     private static String nombreCompleto(Usuario usuario) {

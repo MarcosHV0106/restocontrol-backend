@@ -91,12 +91,13 @@ public class ConsumoInventarioService {
         }
         List<String> noDisponibles = detalles.stream()
                 .map(DetallePedido::getIdAlimento)
-                .filter(alimento -> !Boolean.TRUE.equals(alimento.getDisponible()))
+                .filter(alimento -> !Boolean.TRUE.equals(alimento.getDisponible())
+                        || Boolean.TRUE.equals(alimento.getBloqueadoCocina()))
                 .map(alimento -> alimento.getNombreAlimento())
                 .distinct()
                 .toList();
         if (!noDisponibles.isEmpty()) {
-            throw new ConflictException("Estos platos no estan habilitados en el menu: "
+            throw new ConflictException("Estos platos no están disponibles para Cocina: "
                     + String.join(", ", noDisponibles) + ".");
         }
         planificarConsumo(construirRequerimientos(detalles));
