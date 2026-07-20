@@ -4,6 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -16,17 +19,29 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    // Una clave segura de al menos 256 bits codificada en Base64.
-    // NOTA: Lo ideal en producción es mover esto a tu archivo application.properties
-    private static final String SECRET_KEY = "NDVBNkM3RjhEOUUxQjJDM0Q0RTVGNkc3SDhKOUswTDFNMk4zUDQ=";
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtUtil.class);
+    private final SecretKey signingKey;
+    private final long expirationTime;
 
-    // El token expirará en 24 horas (en milisegundos)
-    private static final long EXPIRATION_TIME = 86400000;
+    public JwtUtil(
+            @Value("${restocontrol.jwt.secret:}") String secretKey,
+            @Value("${restocontrol.jwt.expiration-ms:86400000}") long expirationTime
+    ) {
+        if (secretKey == null || secretKey.isBlank()) {
+            this.signingKey = Jwts.SIG.HS256.key().build();
+            LOGGER.warn("JWT_SECRET no configurado; se usara una clave efimera hasta reiniciar la aplicacion.");
+        } else {
+            this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey.trim()));
+        }
+        if (expirationTime <= 0) {
+            throw new IllegalArgumentException("La expiracion del JWT debe ser mayor que cero.");
+        }
+        this.expirationTime = expirationTime;
+    }
 
     // Convierte la firma en un objeto SecretKey usando la especificación HMAC-SHA
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return signingKey;
     }
 
     // Extrae el correo/username del token
@@ -51,7 +66,7 @@ public class JwtUtil {
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey())
                 .compact();
     }

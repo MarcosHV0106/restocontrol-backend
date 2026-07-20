@@ -1,5 +1,7 @@
 # Trabajo Colaborativo con GitHub y Branches
 
+La matriz actual de requisitos, roles, flujos y condiciones de despliegue se encuentra en [docs/CUMPLIMIENTO_REQUISITOS.md](docs/CUMPLIMIENTO_REQUISITOS.md).
+
 ## IMPORTANTE
 
 El proyecto será trabajado utilizando:
