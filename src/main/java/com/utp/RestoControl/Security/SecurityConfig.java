@@ -1,5 +1,6 @@
 package com.utp.RestoControl.Security;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,9 @@ public class SecurityConfig {
     @Value("${restocontrol.logging.request-id-header:X-Request-ID}")
     private String requestIdHeader;
 
+    @Value("${restocontrol.cors.allowed-origins:http://localhost:5173,http://127.0.0.1:5173}")
+    private String allowedOrigins;
+
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
@@ -46,12 +50,15 @@ public class SecurityConfig {
                 // Autorización de rutas modificada a Autoridades directas
                 .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/auth/login", "/api/auth/registro", "/api/auth/activaciones/**").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 // Nota: Al usar hasAnyRole, NO pongas el prefijo "ROLE_" aquí,
                 // Spring lo añade automáticamente por ti.
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/usuarios", "/api/usuarios/**", "/api/roles", "/api/roles/**")
                 .hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/reportes", "/api/reportes/**")
+                .hasAnyRole("ADMIN", "GERENTE")
+                .requestMatchers(HttpMethod.GET, "/api/auditoria", "/api/auditoria/**")
                 .hasAnyRole("ADMIN", "GERENTE")
                 .requestMatchers("/api/reportes", "/api/reportes/**").hasRole("ADMIN")
                 .requestMatchers("/api/estimaciones-diarias", "/api/estimaciones-diarias/**")
@@ -98,7 +105,7 @@ public class SecurityConfig {
                 // CORS (Se mantiene igual para permitir que Vue se conecte)
                 .cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:5173"));
+            config.setAllowedOrigins(resolverOrigenesPermitidos());
             config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
             config.setAllowedHeaders(List.of("*"));
             config.setExposedHeaders(List.of(requestIdHeader));
@@ -109,6 +116,14 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    private List<String> resolverOrigenesPermitidos() {
+        return Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(origen -> !origen.isBlank())
+                .distinct()
+                .toList();
     }
 
     @Bean

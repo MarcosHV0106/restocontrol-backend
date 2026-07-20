@@ -57,6 +57,7 @@ public class AuthenticationController {
                             loginRequest.getClave()
                     )
             );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // 2. Extraemos el UserDetails autenticado
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
