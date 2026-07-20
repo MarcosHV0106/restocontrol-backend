@@ -3,24 +3,34 @@ package com.utp.RestoControl.Service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.utp.RestoControl.Dto.AtencionAlertaRequest;
+import com.utp.RestoControl.Dto.RetirarLoteRequest;
 import com.utp.RestoControl.Entity.AlertaInventario;
 import com.utp.RestoControl.Entity.Insumo;
 import com.utp.RestoControl.Entity.LoteInsumo;
+import com.utp.RestoControl.Entity.Usuario;
 import com.utp.RestoControl.Repository.AlertaInventarioRepository;
 import com.utp.RestoControl.Repository.InsumoRepository;
 import com.utp.RestoControl.Repository.LoteInsumoRepository;
 import com.utp.RestoControl.Repository.UsuarioRepository;
+import com.utp.RestoControl.Security.UserPrincipal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +38,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @ExtendWith(MockitoExtension.class)
 class AlertaInventarioServiceTests {
@@ -50,7 +62,12 @@ class AlertaInventarioServiceTests {
 
     @BeforeEach
     void prepararAlertasExistentes() {
-        when(alertaRepository.findByEliminadoFalseOrderByFechaGeneracionDesc()).thenReturn(List.of());
+        lenient().when(alertaRepository.findByEliminadoFalseOrderByFechaGeneracionDesc()).thenReturn(List.of());
+    }
+
+    @AfterEach
+    void limpiarSeguridad() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -129,6 +146,68 @@ class AlertaInventarioServiceTests {
         assertEquals("ATENDIDA", existente.getEstado());
         assertNull(existente.getClaveActiva());
         verify(alertaRepository).save(existente);
+    }
+
+    @Test
+    void solicitarReposicionDejaLaAlertaEnSeguimientoConAuditoria() {
+        Insumo insumo = insumo(1, "Pollo", 2, 5);
+        AlertaInventario alerta = alertaActiva(insumo);
+        Usuario responsable = autenticarUsuario(7);
+        when(alertaRepository.findByIdAlertaAndEliminadoFalse(10)).thenReturn(Optional.of(alerta));
+        when(alertaRepository.save(any(AlertaInventario.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
+
+        AtencionAlertaRequest request = new AtencionAlertaRequest();
+        request.setAccion("SOLICITAR_REPOSICION");
+        request.setObservacion("Comprar antes del turno noche");
+
+        AlertaInventario atendida = service.atender(10, request);
+
+        assertEquals("REVISADA", atendida.getEstado());
+        assertEquals("SOLICITAR_REPOSICION", atendida.getAccion());
+        assertEquals("Comprar antes del turno noche", atendida.getObservacion());
+        assertSame(responsable, atendida.getUsuarioAtencion());
+        assertNotNull(atendida.getFechaRevision());
+        assertNull(atendida.getFechaAtencion());
+    }
+
+    @Test
+    void retirarLoteVencidoRegistraMermaYCierraLaAlerta() {
+        Insumo insumo = insumo(1, "Pollo", 10, 5);
+        LoteInsumo lote = lote(22, insumo, LocalDate.now(ZONA_LIMA).minusDays(1));
+        AlertaInventario alerta = alertaActiva(insumo);
+        alerta.setTipo(AlertaInventarioService.LOTE_VENCIDO);
+        alerta.setLote(lote);
+        alerta.setClaveActiva("LOTE_VENCIDO:LOTE:22");
+        autenticarUsuario(7);
+        when(alertaRepository.findByIdAlertaAndEliminadoFalse(10)).thenReturn(Optional.of(alerta));
+        when(alertaRepository.save(any(AlertaInventario.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
+
+        AtencionAlertaRequest request = new AtencionAlertaRequest();
+        request.setAccion("RETIRAR_LOTE_MERMA");
+        request.setObservacion("Lote descartado por vencimiento");
+
+        AlertaInventario atendida = service.atender(10, request);
+
+        ArgumentCaptor<RetirarLoteRequest> retiro = ArgumentCaptor.forClass(RetirarLoteRequest.class);
+        verify(loteService).retirar(eq(22), retiro.capture());
+        assertEquals("Lote descartado por vencimiento", retiro.getValue().getMotivo());
+        assertEquals("ALERTA-10", retiro.getValue().getReferencia());
+        assertEquals("ATENDIDA", atendida.getEstado());
+        assertNotNull(atendida.getFechaAtencion());
+        assertNull(atendida.getClaveActiva());
+    }
+
+    private Usuario autenticarUsuario(Integer idUsuario) {
+        UserPrincipal principal = mock(UserPrincipal.class);
+        when(principal.getId()).thenReturn(idUsuario);
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, null));
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(idUsuario);
+        usuario.setNombre("María");
+        usuario.setApellido("Almacén");
+        when(usuarioRepository.findByIdUsuarioAndEliminadoFalse(idUsuario)).thenReturn(Optional.of(usuario));
+        return usuario;
     }
 
     private Insumo insumo(Integer id, String nombre, double stock, double minimo) {
