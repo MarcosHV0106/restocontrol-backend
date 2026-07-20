@@ -50,6 +50,7 @@ public class PedidoService {
     private final EstadoPedidoService estadoPedidoService;
     private final ModalidadPedidoService modalidadPedidoService;
     private final AlimentoService alimentoService;
+    private final ConsumoInventarioService consumoInventarioService;
 
     @Transactional
     public Pedido guardar(PedidoRequest request) {
@@ -181,6 +182,8 @@ public class PedidoService {
                 && pedido.getDetalles().stream().anyMatch(detalle -> !Boolean.TRUE.equals(detalle.getEliminado())),
                 "El pedido debe tener al menos un producto para enviarse a Cocina."
         );
+
+        consumoInventarioService.validarDisponibilidadParaPedido(pedido);
 
         pedido.setFechaEnvioCocina(LocalDateTime.now());
         return pedidoRepository.save(pedido);

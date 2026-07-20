@@ -41,5 +41,9 @@ public interface LoteInsumoRepository extends JpaRepository<LoteInsumo, Integer>
     @EntityGraph(attributePaths = "insumo")
     Optional<LoteInsumo> findByIdLoteAndEliminadoFalse(Integer idLote);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select l from LoteInsumo l join fetch l.insumo where l.idLote = :idLote and l.eliminado = false")
+    Optional<LoteInsumo> findParaActualizar(@Param("idLote") Integer idLote);
+
     boolean existsByCodigoIgnoreCase(String codigo);
 }

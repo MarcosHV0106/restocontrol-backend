@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.utp.RestoControl.Dto.LoteInsumoRequest;
+import com.utp.RestoControl.Dto.AjusteLoteRequest;
 import com.utp.RestoControl.Dto.RetirarLoteRequest;
 import com.utp.RestoControl.Entity.Insumo;
 import com.utp.RestoControl.Entity.LoteInsumo;
@@ -71,7 +72,7 @@ class LoteInsumoServiceTests {
         Insumo insumo = insumo();
         LoteInsumo retirado = lote(1, insumo, BigDecimal.valueOf(7));
         LoteInsumo restante = lote(2, insumo, BigDecimal.valueOf(3));
-        when(loteRepository.findByIdLoteAndEliminadoFalse(1)).thenReturn(Optional.of(retirado));
+        when(loteRepository.findParaActualizar(1)).thenReturn(Optional.of(retirado));
         when(loteRepository.findByInsumo_IdInsumoAndEliminadoFalseOrderByFechaVencimientoAsc(1))
                 .thenReturn(List.of(retirado, restante));
         RetirarLoteRequest request = new RetirarLoteRequest();
@@ -94,6 +95,49 @@ class LoteInsumoServiceTests {
         request.setCantidad(BigDecimal.valueOf(2));
 
         assertThrows(IllegalArgumentException.class, () -> service.crear(1, request));
+    }
+
+    @Test
+    void registraUnaSalidaParcialSinPerderElRestoDelLote() {
+        Insumo insumo = insumo();
+        LoteInsumo ajustado = lote(1, insumo, BigDecimal.valueOf(7));
+        when(loteRepository.findParaActualizar(1)).thenReturn(Optional.of(ajustado));
+        when(loteRepository.findByInsumo_IdInsumoAndEliminadoFalseOrderByFechaVencimientoAsc(1))
+                .thenReturn(List.of(ajustado));
+        AjusteLoteRequest request = new AjusteLoteRequest();
+        request.setTipo("SALIDA");
+        request.setCantidad(BigDecimal.valueOf(2));
+        request.setMotivo("Consumo interno");
+
+        service.ajustar(1, request);
+
+        assertDecimal("5", ajustado.getCantidadActual());
+        assertEquals("ACTIVO", ajustado.getEstado());
+        assertDecimal("5", insumo.getStockActual());
+        ArgumentCaptor<MovimientoInventario> movimiento = ArgumentCaptor.forClass(MovimientoInventario.class);
+        verify(movimientoRepository).save(movimiento.capture());
+        assertEquals("SALIDA", movimiento.getValue().getTipoMovimiento());
+        assertDecimal("2", movimiento.getValue().getCantidad());
+    }
+
+    @Test
+    void permiteCorregirPositivamenteUnLoteAgotado() {
+        Insumo insumo = insumo();
+        LoteInsumo ajustado = lote(1, insumo, BigDecimal.ZERO);
+        ajustado.setEstado("AGOTADO");
+        when(loteRepository.findParaActualizar(1)).thenReturn(Optional.of(ajustado));
+        when(loteRepository.findByInsumo_IdInsumoAndEliminadoFalseOrderByFechaVencimientoAsc(1))
+                .thenReturn(List.of(ajustado));
+        AjusteLoteRequest request = new AjusteLoteRequest();
+        request.setTipo("CORRECCION_POSITIVA");
+        request.setCantidad(new BigDecimal("1.5"));
+        request.setMotivo("Conteo fisico");
+
+        service.ajustar(1, request);
+
+        assertDecimal("1.5", ajustado.getCantidadActual());
+        assertEquals("ACTIVO", ajustado.getEstado());
+        assertDecimal("1.5", insumo.getStockActual());
     }
 
     private Insumo insumo() {

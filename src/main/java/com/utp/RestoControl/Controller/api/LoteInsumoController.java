@@ -1,6 +1,7 @@
 package com.utp.RestoControl.Controller.api;
 
 import com.utp.RestoControl.Dto.ActualizarLoteRequest;
+import com.utp.RestoControl.Dto.AjusteLoteRequest;
 import com.utp.RestoControl.Dto.LoteInsumoRequest;
 import com.utp.RestoControl.Dto.LoteInsumoResponse;
 import com.utp.RestoControl.Dto.RetirarLoteRequest;
@@ -54,6 +55,15 @@ public class LoteInsumoController {
             @PathVariable Integer idLote,
             @RequestBody(required = false) RetirarLoteRequest request) {
         LoteInsumoResponse response = LoteInsumoResponse.from(loteService.retirar(idLote, request));
+        alertaService.sincronizar();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/lotes/{idLote}/ajustes")
+    public ResponseEntity<LoteInsumoResponse> ajustar(
+            @PathVariable Integer idLote,
+            @RequestBody AjusteLoteRequest request) {
+        LoteInsumoResponse response = LoteInsumoResponse.from(loteService.ajustar(idLote, request));
         alertaService.sincronizar();
         return ResponseEntity.ok(response);
     }

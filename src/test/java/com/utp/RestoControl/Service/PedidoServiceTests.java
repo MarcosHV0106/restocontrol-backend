@@ -56,6 +56,8 @@ class PedidoServiceTests {
     private ModalidadPedidoService modalidadPedidoService;
     @Mock
     private AlimentoService alimentoService;
+    @Mock
+    private ConsumoInventarioService consumoInventarioService;
 
     @InjectMocks
     private PedidoService pedidoService;
@@ -204,6 +206,7 @@ class PedidoServiceTests {
         Pedido enviado = pedidoService.enviarACocina(20);
 
         assertNotNull(enviado.getFechaEnvioCocina());
+        verify(consumoInventarioService).validarDisponibilidadParaPedido(pedido);
 
         PedidoRequest request = new PedidoRequest(3, null, 1, null, null, List.of(new DetallePedidoRequest(5, 1)));
         assertThrows(ConflictException.class, () -> pedidoService.actualizar(20, request));

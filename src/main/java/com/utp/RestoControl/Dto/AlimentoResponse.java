@@ -1,7 +1,10 @@
 package com.utp.RestoControl.Dto;
 
 import com.utp.RestoControl.Entity.Alimento;
+import com.utp.RestoControl.Entity.RecetaAlimento;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -15,9 +18,15 @@ public class AlimentoResponse {
     private BigDecimal precio;
     private BigDecimal costoReceta;
     private Boolean disponible;
+    private Boolean recetaConfigurada;
+    private Boolean inventarioSuficiente;
+    private Boolean disponibleParaPedidos;
+    private Integer porcionesDisponibles;
+    private String motivoNoDisponible;
     private CategoriaResponse categoria;
 
     public static AlimentoResponse from(Alimento alimento) {
+        EstadoOperativo estado = calcularEstadoOperativo(alimento);
         return new AlimentoResponse(
                 alimento.getIdAlimento(),
                 alimento.getNombreAlimento(),
@@ -25,8 +34,40 @@ public class AlimentoResponse {
                 alimento.getPrecio(),
                 calcularCostoReceta(alimento),
                 alimento.getDisponible(),
+                estado.recetaConfigurada(),
+                estado.inventarioSuficiente(),
+                estado.disponibleParaPedidos(),
+                estado.porcionesDisponibles(),
+                estado.motivoNoDisponible(),
                 CategoriaResponse.from(alimento.getCategoria())
         );
+    }
+
+    private static EstadoOperativo calcularEstadoOperativo(Alimento alimento) {
+        List<RecetaAlimento> receta = alimento.getReceta() == null ? List.of() : alimento.getReceta();
+        if (!Boolean.TRUE.equals(alimento.getDisponible())) {
+            return new EstadoOperativo(!receta.isEmpty(), false, false, 0, "Deshabilitado en el menu");
+        }
+        if (receta.isEmpty()) {
+            return new EstadoOperativo(false, false, false, 0, "Receta pendiente de configuracion");
+        }
+        boolean recetaValida = receta.stream().allMatch(detalle -> detalle.getCantidad() != null
+                && detalle.getCantidad().compareTo(BigDecimal.ZERO) > 0
+                && detalle.getInsumo() != null
+                && !Boolean.TRUE.equals(detalle.getInsumo().getEliminado()));
+        if (!recetaValida) {
+            return new EstadoOperativo(false, false, false, 0, "La receta contiene insumos incompletos");
+        }
+
+        int porciones = receta.stream().mapToInt(detalle -> {
+            BigDecimal stock = detalle.getInsumo().getStockActual() == null
+                    ? BigDecimal.ZERO : detalle.getInsumo().getStockActual();
+            BigDecimal posibles = stock.divide(detalle.getCantidad(), 0, RoundingMode.DOWN);
+            return posibles.min(BigDecimal.valueOf(100000)).intValue();
+        }).min().orElse(0);
+        boolean inventarioSuficiente = porciones > 0;
+        String motivo = inventarioSuficiente ? null : "Inventario insuficiente para una porcion";
+        return new EstadoOperativo(true, inventarioSuficiente, inventarioSuficiente, porciones, motivo);
     }
 
     private static BigDecimal calcularCostoReceta(Alimento alimento) {
@@ -40,5 +81,14 @@ public class AlimentoResponse {
                         && detalle.getInsumo().getCostoUnitario() != null)
                 .map(detalle -> detalle.getCantidad().multiply(detalle.getInsumo().getCostoUnitario()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private record EstadoOperativo(
+            boolean recetaConfigurada,
+            boolean inventarioSuficiente,
+            boolean disponibleParaPedidos,
+            int porcionesDisponibles,
+            String motivoNoDisponible
+    ) {
     }
 }

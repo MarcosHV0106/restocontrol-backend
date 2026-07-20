@@ -2,6 +2,7 @@ package com.utp.RestoControl.Service;
 
 import com.google.common.base.Preconditions;
 import com.utp.RestoControl.Dto.ActualizarLoteRequest;
+import com.utp.RestoControl.Dto.AjusteLoteRequest;
 import com.utp.RestoControl.Dto.LoteInsumoRequest;
 import com.utp.RestoControl.Dto.RetirarLoteRequest;
 import com.utp.RestoControl.Entity.Insumo;
@@ -22,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -34,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoteInsumoService {
 
     private static final ZoneId ZONA_LIMA = ZoneId.of("America/Lima");
+    private static final Set<String> TIPOS_AJUSTE = Set.of(
+            "SALIDA", "MERMA", "CORRECCION_POSITIVA", "CORRECCION_NEGATIVA");
 
     private final LoteInsumoRepository loteRepository;
     private final InsumoRepository insumoRepository;
@@ -80,7 +84,7 @@ public class LoteInsumoService {
         Preconditions.checkArgument(request != null, "Los datos del lote son obligatorios.");
         Preconditions.checkArgument(request.getFechaVencimiento() != null,
                 "La fecha de vencimiento es obligatoria.");
-        LoteInsumo lote = buscarPorId(idLote);
+        LoteInsumo lote = buscarParaActualizar(idLote);
         if ("RETIRADO".equals(lote.getEstado())) {
             throw new ConflictException("No se puede editar un lote retirado.");
         }
@@ -99,7 +103,7 @@ public class LoteInsumoService {
 
     @Transactional
     public LoteInsumo retirar(Integer idLote, RetirarLoteRequest request) {
-        LoteInsumo lote = buscarPorId(idLote);
+        LoteInsumo lote = buscarParaActualizar(idLote);
         if (lote.getCantidadActual() == null
                 || lote.getCantidadActual().compareTo(BigDecimal.ZERO) <= 0) {
             throw new ConflictException("El lote ya no tiene existencias.");
@@ -118,9 +122,56 @@ public class LoteInsumoService {
         return lote;
     }
 
+    @Transactional
+    public LoteInsumo ajustar(Integer idLote, AjusteLoteRequest request) {
+        Preconditions.checkArgument(request != null, "Los datos del ajuste son obligatorios.");
+        String tipo = request.getTipo() == null ? "" : request.getTipo().trim().toUpperCase(Locale.ROOT);
+        Preconditions.checkArgument(TIPOS_AJUSTE.contains(tipo), "El tipo de ajuste no es valido.");
+        Preconditions.checkArgument(request.getCantidad() != null
+                        && request.getCantidad().compareTo(BigDecimal.ZERO) > 0,
+                "La cantidad del ajuste debe ser mayor a cero.");
+        String motivo = normalizar(request.getMotivo(), 150);
+        Preconditions.checkArgument(motivo != null, "El motivo del ajuste es obligatorio.");
+
+        LoteInsumo lote = buscarParaActualizar(idLote);
+        if ("RETIRADO".equals(lote.getEstado())) {
+            throw new ConflictException("No se puede ajustar un lote retirado.");
+        }
+
+        boolean positivo = "CORRECCION_POSITIVA".equals(tipo);
+        if (positivo) {
+            if (lote.getFechaVencimiento() != null
+                    && lote.getFechaVencimiento().isBefore(LocalDate.now(ZONA_LIMA))) {
+                throw new ConflictException("No se puede aumentar la existencia de un lote vencido.");
+            }
+            lote.setCantidadActual(lote.getCantidadActual().add(request.getCantidad()));
+            lote.setEstado("ACTIVO");
+        } else {
+            if (lote.getCantidadActual() == null
+                    || lote.getCantidadActual().compareTo(request.getCantidad()) < 0) {
+                throw new ConflictException("La cantidad supera la existencia disponible del lote.");
+            }
+            lote.setCantidadActual(lote.getCantidadActual().subtract(request.getCantidad()));
+            if (lote.getCantidadActual().compareTo(BigDecimal.ZERO) == 0) {
+                lote.setEstado("AGOTADO");
+            }
+        }
+
+        loteRepository.save(lote);
+        registrarMovimiento(lote, tipo, request.getCantidad(), motivo,
+                normalizar(request.getReferencia(), 100));
+        recalcularStock(lote.getInsumo());
+        return lote;
+    }
+
     @Transactional(readOnly = true)
     public LoteInsumo buscarPorId(Integer idLote) {
         return loteRepository.findByIdLoteAndEliminadoFalse(idLote)
+                .orElseThrow(() -> new ResourceNotFoundException("Lote no encontrado."));
+    }
+
+    private LoteInsumo buscarParaActualizar(Integer idLote) {
+        return loteRepository.findParaActualizar(idLote)
                 .orElseThrow(() -> new ResourceNotFoundException("Lote no encontrado."));
     }
 
