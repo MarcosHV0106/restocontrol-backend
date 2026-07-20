@@ -4,6 +4,7 @@ import com.utp.RestoControl.Entity.Alimento;
 import com.utp.RestoControl.Entity.RecetaAlimento;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +19,10 @@ public class AlimentoResponse {
     private BigDecimal precio;
     private BigDecimal costoReceta;
     private Boolean disponible;
+    private Boolean bloqueadoCocina;
+    private String motivoBloqueoCocina;
+    private LocalDateTime fechaBloqueoCocina;
+    private String responsableBloqueoCocina;
     private Boolean recetaConfigurada;
     private Boolean inventarioSuficiente;
     private Boolean disponibleParaPedidos;
@@ -34,6 +39,10 @@ public class AlimentoResponse {
                 alimento.getPrecio(),
                 calcularCostoReceta(alimento),
                 alimento.getDisponible(),
+                Boolean.TRUE.equals(alimento.getBloqueadoCocina()),
+                alimento.getMotivoBloqueoCocina(),
+                alimento.getFechaBloqueoCocina(),
+                nombreResponsableCocina(alimento),
                 estado.recetaConfigurada(),
                 estado.inventarioSuficiente(),
                 estado.disponibleParaPedidos(),
@@ -66,8 +75,24 @@ public class AlimentoResponse {
             return posibles.min(BigDecimal.valueOf(100000)).intValue();
         }).min().orElse(0);
         boolean inventarioSuficiente = porciones > 0;
+        if (Boolean.TRUE.equals(alimento.getBloqueadoCocina())) {
+            String motivoCocina = alimento.getMotivoBloqueoCocina();
+            String motivo = motivoCocina == null || motivoCocina.isBlank()
+                    ? "Cocina notifico que el producto esta agotado"
+                    : "Cocina notifico: " + motivoCocina.trim();
+            return new EstadoOperativo(true, inventarioSuficiente, false, porciones, motivo);
+        }
         String motivo = inventarioSuficiente ? null : "Inventario insuficiente para una porcion";
         return new EstadoOperativo(true, inventarioSuficiente, inventarioSuficiente, porciones, motivo);
+    }
+
+    private static String nombreResponsableCocina(Alimento alimento) {
+        if (alimento.getUsuarioBloqueoCocina() == null) {
+            return null;
+        }
+        String nombre = (alimento.getUsuarioBloqueoCocina().getNombre() + " "
+                + alimento.getUsuarioBloqueoCocina().getApellido()).trim();
+        return nombre.isBlank() ? alimento.getUsuarioBloqueoCocina().getCorreo() : nombre;
     }
 
     private static BigDecimal calcularCostoReceta(Alimento alimento) {
