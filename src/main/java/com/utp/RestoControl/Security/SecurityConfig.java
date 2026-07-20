@@ -62,6 +62,9 @@ public class SecurityConfig {
                 .hasAnyRole("ADMIN", "ALMACENERO")
                 .requestMatchers("/api/movimientosinventarios", "/api/movimientosinventarios/**")
                 .hasAnyRole("ADMIN", "ALMACENERO")
+                .requestMatchers("/api/proveedores", "/api/proveedores/**",
+                        "/api/compras-abastecimiento", "/api/compras-abastecimiento/**")
+                .hasAnyRole("ADMIN", "ALMACENERO")
                 .requestMatchers(HttpMethod.POST, "/api/insumos", "/api/insumos/**")
                 .hasAnyRole("ADMIN", "ALMACENERO")
                 .requestMatchers(HttpMethod.PUT, "/api/insumos", "/api/insumos/**")

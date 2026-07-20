@@ -81,6 +81,27 @@ public class ConsumoInventarioService {
         alertaService.sincronizar();
     }
 
+    @Transactional
+    public void validarDisponibilidadParaPedido(Pedido pedido) {
+        Preconditions.checkArgument(pedido != null && pedido.getIdPedido() != null,
+                "El pedido es obligatorio para validar inventario.");
+        List<DetallePedido> detalles = detallesActivos(pedido);
+        if (detalles.isEmpty()) {
+            throw new ConflictException("El pedido no contiene platos para preparar.");
+        }
+        List<String> noDisponibles = detalles.stream()
+                .map(DetallePedido::getIdAlimento)
+                .filter(alimento -> !Boolean.TRUE.equals(alimento.getDisponible()))
+                .map(alimento -> alimento.getNombreAlimento())
+                .distinct()
+                .toList();
+        if (!noDisponibles.isEmpty()) {
+            throw new ConflictException("Estos platos no estan habilitados en el menu: "
+                    + String.join(", ", noDisponibles) + ".");
+        }
+        planificarConsumo(construirRequerimientos(detalles));
+    }
+
     private List<DetallePedido> detallesActivos(Pedido pedido) {
         return pedido.getDetalles() == null ? List.of() : pedido.getDetalles().stream()
                 .filter(detalle -> !Boolean.TRUE.equals(detalle.getEliminado()))

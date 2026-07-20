@@ -165,6 +165,21 @@ class ConsumoInventarioServiceTests {
         );
     }
 
+    @Test
+    void impideEnviarACocinaUnPlatoDeshabilitado() {
+        Alimento alimento = alimento(4, "Plato temporal");
+        alimento.setDisponible(false);
+        Pedido pedido = pedido(12, detalle(alimento, 1));
+
+        ConflictException error = assertThrows(
+                ConflictException.class,
+                () -> service.validarDisponibilidadParaPedido(pedido)
+        );
+
+        assertTrue(error.getMessage().contains("Plato temporal"));
+        verifyNoInteractions(recetaRepository, loteRepository);
+    }
+
     private Pedido pedido(Integer id, DetallePedido... detalles) {
         Pedido pedido = new Pedido();
         pedido.setIdPedido(id);
