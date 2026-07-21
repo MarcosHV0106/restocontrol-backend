@@ -50,7 +50,7 @@ public class PedidoService {
     private final EstadoPedidoService estadoPedidoService;
     private final ModalidadPedidoService modalidadPedidoService;
     private final AlimentoService alimentoService;
-    private final ConsumoInventarioService consumoInventarioService;
+    private final StockAlimentoService stockAlimentoService;
 
     @Transactional
     public Pedido guardar(PedidoRequest request) {
@@ -183,7 +183,7 @@ public class PedidoService {
                 "El pedido debe tener al menos un producto para enviarse a Cocina."
         );
 
-        consumoInventarioService.validarDisponibilidadParaPedido(pedido);
+        stockAlimentoService.validarDisponibilidadParaPedido(pedido);
 
         pedido.setFechaEnvioCocina(LocalDateTime.now());
         return pedidoRepository.save(pedido);
@@ -198,7 +198,7 @@ public class PedidoService {
         Preconditions.checkState(pedido.getFechaEnvioCocina() != null, "El pedido ya esta en borrador.");
         Preconditions.checkState(pedido.getFechaSolicitudCuenta() == null, "La cuenta ya fue solicitada.");
         Preconditions.checkState(
-                pedido.getFechaConsumoInventario() == null && pedido.getFechaInicioPreparacion() == null,
+                pedido.getFechaDescuentoStock() == null && pedido.getFechaInicioPreparacion() == null,
                 "El pedido ya inicio su preparacion y no puede reabrirse."
         );
         Preconditions.checkState(
@@ -248,8 +248,8 @@ public class PedidoService {
 
         Preconditions.checkState(pedido.getFechaSolicitudCuenta() == null, "No se puede anular una cuenta solicitada.");
         Preconditions.checkState(
-                pedido.getFechaConsumoInventario() == null && pedido.getFechaInicioPreparacion() == null,
-                "El pedido ya inicio su preparacion. Anularlo requiere un ajuste de inventario."
+                pedido.getFechaDescuentoStock() == null && pedido.getFechaInicioPreparacion() == null,
+                "El pedido ya inicio su preparacion y no puede anularse."
         );
 
         String motivoNormalizado = normalizarTexto(

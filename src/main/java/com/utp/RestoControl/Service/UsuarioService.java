@@ -45,7 +45,10 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public List<Usuario> listar() {
-        return repository.findByEliminadoFalse();
+        return repository.findByEliminadoFalse().stream()
+                .filter(usuario -> usuario.getRol() != null)
+                .filter(usuario -> !Boolean.TRUE.equals(usuario.getRol().getEliminado()))
+                .toList();
     }
 
     @Transactional(readOnly = true)

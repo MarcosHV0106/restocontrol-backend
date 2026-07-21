@@ -35,6 +35,10 @@ public class UserDetailsService implements org.springframework.security.core.use
             throw new UsernameNotFoundException("Cuenta pendiente de activacion: " + username);
         }
 
+        if (usuario.getRol() == null || Boolean.TRUE.equals(usuario.getRol().getEliminado())) {
+            throw new UsernameNotFoundException("Rol inactivo: " + username);
+        }
+
         // Simplemente retornas tu clase UserPrincipal.
         // UserPrincipal ya se encarga de asignar los roles (authorities) en su constructor.
         return new UserPrincipal(usuario);

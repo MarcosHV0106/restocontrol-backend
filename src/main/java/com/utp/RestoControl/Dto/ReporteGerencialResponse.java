@@ -14,23 +14,15 @@ public record ReporteGerencialResponse(
         List<VentaPeriodo> ventasPorMes,
         List<ProductoVendido> productosMasVendidos,
         List<ProductoVendido> productosMenosVendidos,
-        List<ConsumoInsumo> consumoInsumos,
         List<PedidoCancelado> pedidosCancelados,
-        List<VentasModalidad> ventasPorModalidad,
-        List<MovimientoInventarioItem> movimientosInventario,
-        List<InsumoAgotado> insumosAgotados
+        List<VentasModalidad> ventasPorModalidad
 ) {
     public record IndicadoresDecision(
             BigDecimal ventasTotales,
-            BigDecimal comprasRegistradas,
-            BigDecimal costoConsumoInventario,
-            BigDecimal valorInventarioActual,
             long pedidosPagados,
             long pedidosCancelados,
             BigDecimal tasaCancelacion,
-            long insumosAgotados,
-            long insumosBajoMinimo,
-            long alertasActivas
+            BigDecimal ticketPromedio
     ) {}
 
     public record VentaPeriodo(
@@ -49,16 +41,6 @@ public record ReporteGerencialResponse(
             BigDecimal ingresos
     ) {}
 
-    public record ConsumoInsumo(
-            Integer idInsumo,
-            String insumo,
-            String unidadMedida,
-            BigDecimal cantidadConsumida,
-            BigDecimal costoTeorico,
-            long movimientos,
-            LocalDateTime ultimoConsumo
-    ) {}
-
     public record PedidoCancelado(
             Integer idPedido,
             LocalDateTime fechaCancelacion,
@@ -74,25 +56,5 @@ public record ReporteGerencialResponse(
             long pedidos,
             BigDecimal ventas,
             BigDecimal participacion
-    ) {}
-
-    public record MovimientoInventarioItem(
-            Integer idMovimiento,
-            LocalDateTime fecha,
-            String tipo,
-            String insumo,
-            String unidadMedida,
-            BigDecimal cantidad,
-            String referencia,
-            String responsable
-    ) {}
-
-    public record InsumoAgotado(
-            Integer idInsumo,
-            String insumo,
-            String unidadMedida,
-            BigDecimal stockActual,
-            BigDecimal stockMinimo,
-            BigDecimal costoUnitario
     ) {}
 }

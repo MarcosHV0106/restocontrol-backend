@@ -50,6 +50,7 @@ public class AlimentoService {
         alimento.setDescripcion(normalizarOpcional(request.getDescripcion()));
         alimento.setPrecio(request.getPrecio());
         alimento.setDisponible(MoreObjects.firstNonNull(request.getDisponible(), true));
+        alimento.setStock(MoreObjects.firstNonNull(request.getStock(), 0));
         alimento.setCategoria(buscarCategoriaActiva(obtenerIdCategoria(request)));
         alimento.setEliminado(false);
 
@@ -65,6 +66,7 @@ public class AlimentoService {
         alimento.setDescripcion(normalizarOpcional(request.getDescripcion()));
         alimento.setPrecio(request.getPrecio());
         alimento.setDisponible(MoreObjects.firstNonNull(request.getDisponible(), alimento.getDisponible()));
+        alimento.setStock(MoreObjects.firstNonNull(request.getStock(), alimento.getStock()));
         alimento.setCategoria(buscarCategoriaActiva(obtenerIdCategoria(request)));
 
         return repository.save(alimento);
@@ -82,6 +84,7 @@ public class AlimentoService {
         normalizarObligatorio(request.getNombreAlimento(), "El nombre del alimento es obligatorio.");
         Preconditions.checkArgument(obtenerIdCategoria(request) != null, "La categoria del alimento es obligatoria.");
         Preconditions.checkArgument(request.getPrecio() != null && request.getPrecio().compareTo(BigDecimal.ZERO) > 0, "El precio debe ser mayor a cero.");
+        Preconditions.checkArgument(request.getStock() == null || request.getStock() >= 0, "El stock no puede ser negativo.");
     }
 
     private Integer obtenerIdCategoria(AlimentoRequest request) {

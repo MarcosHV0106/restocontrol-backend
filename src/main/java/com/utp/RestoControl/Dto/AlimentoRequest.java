@@ -18,6 +18,7 @@ public class AlimentoRequest {
     private String descripcion;
     private BigDecimal precio;
     private Boolean disponible;
+    private Integer stock;
 
     @JsonAlias({"id_categoria", "categoriaId"})
     private Integer idCategoria;

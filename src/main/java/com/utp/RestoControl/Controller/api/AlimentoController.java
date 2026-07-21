@@ -2,9 +2,6 @@ package com.utp.RestoControl.Controller.api;
 import com.utp.RestoControl.Dto.AlimentoRequest;
 import com.utp.RestoControl.Dto.AlimentoResponse;
 import com.utp.RestoControl.Service.AlimentoService;
-import com.utp.RestoControl.Dto.RecetaAlimentoRequest;
-import com.utp.RestoControl.Dto.RecetaAlimentoResponse;
-import com.utp.RestoControl.Service.RecetaAlimentoService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,7 +18,6 @@ import java.util.List;
 public class AlimentoController {
 
     private final AlimentoService service;
-    private final RecetaAlimentoService recetaService;
 
     @GetMapping
     public List<AlimentoResponse> listar(@RequestParam(required = false) Integer idCategoria) {
@@ -58,19 +54,4 @@ public class AlimentoController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("{id}/receta")
-    public List<RecetaAlimentoResponse> obtenerReceta(@PathVariable Integer id) {
-        return recetaService.listar(id).stream()
-                .map(RecetaAlimentoResponse::from)
-                .toList();
-    }
-
-    @PutMapping("{id}/receta")
-    public List<RecetaAlimentoResponse> reemplazarReceta(
-            @PathVariable Integer id,
-            @RequestBody List<RecetaAlimentoRequest> receta) {
-        return recetaService.reemplazar(id, receta).stream()
-                .map(RecetaAlimentoResponse::from)
-                .toList();
-    }
 }

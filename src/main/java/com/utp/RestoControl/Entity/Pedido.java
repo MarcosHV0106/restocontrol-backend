@@ -57,7 +57,7 @@ public class Pedido {
     private LocalDateTime fechaEntregado;
 
     @Column(name = "fecha_consumo_inventario")
-    private LocalDateTime fechaConsumoInventario;
+    private LocalDateTime fechaDescuentoStock;
 
     @Column(name = "fecha_envio_cocina")
     private LocalDateTime fechaEnvioCocina;

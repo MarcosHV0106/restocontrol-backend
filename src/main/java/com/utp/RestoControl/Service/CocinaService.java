@@ -41,7 +41,7 @@ public class CocinaService {
 
     private final PedidoRepository pedidoRepository;
     private final EstadoPedidoRepository estadoPedidoRepository;
-    private final ConsumoInventarioService consumoInventarioService;
+    private final StockAlimentoService stockAlimentoService;
     private final AlimentoRepository alimentoRepository;
     private final UsuarioRepository usuarioRepository;
 
@@ -153,8 +153,8 @@ public class CocinaService {
             );
         }
 
-        if (pedido.getFechaConsumoInventario() == null) {
-            consumoInventarioService.consumirParaPedido(pedido);
+        if (pedido.getFechaDescuentoStock() == null) {
+            stockAlimentoService.descontarParaPedido(pedido);
         }
 
         LocalDateTime ahora = LocalDateTime.now(ZONA_LIMA);

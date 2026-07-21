@@ -111,7 +111,7 @@ public class PedidoResponse {
 
     private static boolean puedeReabrir(Pedido pedido) {
         return pedido.getFechaEnvioCocina() != null
-                && pedido.getFechaConsumoInventario() == null
+                && pedido.getFechaDescuentoStock() == null
                 && pedido.getFechaSolicitudCuenta() == null
                 && "PENDIENTE".equals(normalizarEstado(pedido));
     }

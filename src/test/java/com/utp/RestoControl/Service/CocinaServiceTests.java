@@ -53,7 +53,7 @@ class CocinaServiceTests {
     private EstadoPedidoRepository estadoPedidoRepository;
 
     @Mock
-    private ConsumoInventarioService consumoInventarioService;
+    private StockAlimentoService stockAlimentoService;
 
     @Mock
     private AlimentoRepository alimentoRepository;
@@ -93,7 +93,7 @@ class CocinaServiceTests {
 
         assertSame(preparacion, resultado.getEstadoPedido());
         assertNotNull(resultado.getFechaInicioPreparacion());
-        verify(consumoInventarioService).consumirParaPedido(pedido);
+        verify(stockAlimentoService).descontarParaPedido(pedido);
         verify(pedidoRepository).save(pedido);
     }
 
@@ -136,20 +136,20 @@ class CocinaServiceTests {
         );
 
         verify(pedidoRepository, never()).save(any(Pedido.class));
-        verify(consumoInventarioService, never()).consumirParaPedido(any(Pedido.class));
+        verify(stockAlimentoService, never()).descontarParaPedido(any(Pedido.class));
     }
 
     @Test
-    void noRepiteElConsumoSiElPedidoYaDescontoInventario() {
+    void noRepiteElDescuentoSiElPedidoYaActualizoElStock() {
         Pedido pedido = pedidoConEstado(preparacion);
-        pedido.setFechaConsumoInventario(java.time.LocalDateTime.now());
+        pedido.setFechaDescuentoStock(java.time.LocalDateTime.now());
         when(pedidoRepository.findActivoParaCocina(10)).thenReturn(Optional.of(pedido));
         when(estadoPedidoRepository.findByEliminadoFalse()).thenReturn(List.of(listo));
         when(pedidoRepository.save(pedido)).thenReturn(pedido);
 
         cocinaService.actualizarEstado(10, "LISTO");
 
-        verify(consumoInventarioService, never()).consumirParaPedido(any(Pedido.class));
+        verify(stockAlimentoService, never()).descontarParaPedido(any(Pedido.class));
     }
 
     @Test
@@ -159,7 +159,7 @@ class CocinaServiceTests {
         when(pedidoRepository.findActivoParaCocina(10)).thenReturn(Optional.of(pedido));
 
         assertThrows(ConflictException.class, () -> cocinaService.actualizarEstado(10, "EN_PREPARACION"));
-        verify(consumoInventarioService, never()).consumirParaPedido(any(Pedido.class));
+        verify(stockAlimentoService, never()).descontarParaPedido(any(Pedido.class));
     }
 
     @Test
@@ -273,7 +273,7 @@ class CocinaServiceTests {
         alimento.setBloqueadoCocina(false);
         alimento.setEliminado(false);
         alimento.setCategoria(categoria);
-        alimento.setReceta(List.of());
+        alimento.setStock(20);
         return alimento;
     }
 

@@ -2,74 +2,51 @@ package com.utp.RestoControl.Dto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.utp.RestoControl.Entity.Alimento;
 import com.utp.RestoControl.Entity.CategoriaAlimento;
-import com.utp.RestoControl.Entity.Insumo;
-import com.utp.RestoControl.Entity.RecetaAlimento;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class AlimentoResponseTests {
 
     @Test
-    void marcaComoPendienteUnPlatoHeredadoSinReceta() {
+    void habilitaElPlatoCuandoTieneStock() {
         Alimento alimento = alimentoBase();
-        alimento.setReceta(new ArrayList<>());
+        alimento.setStock(8);
 
         AlimentoResponse response = AlimentoResponse.from(alimento);
 
-        assertFalse(response.getRecetaConfigurada());
-        assertFalse(response.getDisponibleParaPedidos());
-        assertEquals("Receta pendiente de configuracion", response.getMotivoNoDisponible());
-    }
-
-    @Test
-    void calculaLasPorcionesDisponiblesDesdeElInsumoLimitante() {
-        Alimento alimento = alimentoBase();
-        Insumo insumo = new Insumo();
-        insumo.setIdInsumo(5);
-        insumo.setNombreInsumo("Pollo");
-        insumo.setStockActual(new BigDecimal("10"));
-        insumo.setCostoUnitario(new BigDecimal("8"));
-        insumo.setEliminado(false);
-        RecetaAlimento receta = new RecetaAlimento();
-        receta.setAlimento(alimento);
-        receta.setInsumo(insumo);
-        receta.setCantidad(new BigDecimal("2"));
-        alimento.setReceta(List.of(receta));
-
-        AlimentoResponse response = AlimentoResponse.from(alimento);
-
-        assertTrue(response.getRecetaConfigurada());
-        assertTrue(response.getInventarioSuficiente());
         assertTrue(response.getDisponibleParaPedidos());
-        assertEquals(5, response.getPorcionesDisponibles());
+        assertEquals(8, response.getStock());
+        assertNull(response.getMotivoNoDisponible());
     }
 
     @Test
-    void elBloqueoDeCocinaImpideVenderAunqueExistaInventario() {
+    void bloqueaElPlatoCuandoNoTieneStock() {
         Alimento alimento = alimentoBase();
-        Insumo insumo = new Insumo();
-        insumo.setStockActual(new BigDecimal("10"));
-        insumo.setEliminado(false);
-        RecetaAlimento receta = new RecetaAlimento();
-        receta.setAlimento(alimento);
-        receta.setInsumo(insumo);
-        receta.setCantidad(new BigDecimal("2"));
-        alimento.setReceta(List.of(receta));
+        alimento.setStock(0);
+
+        AlimentoResponse response = AlimentoResponse.from(alimento);
+
+        assertFalse(response.getDisponibleParaPedidos());
+        assertEquals("Sin stock disponible", response.getMotivoNoDisponible());
+    }
+
+    @Test
+    void respetaLaPausaTemporalDeCocina() {
+        Alimento alimento = alimentoBase();
+        alimento.setStock(10);
         alimento.setBloqueadoCocina(true);
         alimento.setMotivoBloqueoCocina("Horno fuera de servicio");
 
         AlimentoResponse response = AlimentoResponse.from(alimento);
 
-        assertTrue(response.getInventarioSuficiente());
         assertFalse(response.getDisponibleParaPedidos());
-        assertEquals(5, response.getPorcionesDisponibles());
-        assertEquals("Cocina notifico: Horno fuera de servicio", response.getMotivoNoDisponible());
+        assertEquals(10, response.getStock());
+        assertEquals("Horno fuera de servicio", response.getMotivoNoDisponible());
     }
 
     private Alimento alimentoBase() {
@@ -81,6 +58,7 @@ class AlimentoResponseTests {
         alimento.setNombreAlimento("Pollo a la plancha");
         alimento.setPrecio(new BigDecimal("25"));
         alimento.setDisponible(true);
+        alimento.setBloqueadoCocina(false);
         alimento.setEliminado(false);
         alimento.setCategoria(categoria);
         return alimento;

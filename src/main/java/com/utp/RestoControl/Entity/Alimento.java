@@ -1,13 +1,10 @@
 package com.utp.RestoControl.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "alimentos", indexes = {
@@ -47,6 +44,9 @@ public class Alimento {
     @Column(nullable = false)
     private Boolean disponible = true;
 
+    @Column(nullable = false)
+    private Integer stock = 0;
+
     @Column(name = "bloqueado_cocina", nullable = false)
     private Boolean bloqueadoCocina = false;
 
@@ -74,7 +74,4 @@ public class Alimento {
 
     private CategoriaAlimento categoria;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "alimento", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RecetaAlimento> receta = new ArrayList<>();
 }

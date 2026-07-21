@@ -1,7 +1,6 @@
 package com.utp.RestoControl.Controller.api;
 
 import com.utp.RestoControl.Dto.ReporteGerencialResponse;
-import com.utp.RestoControl.Dto.ReporteRentabilidadResponse;
 import com.utp.RestoControl.Dto.ReporteVentasResponse;
 import com.utp.RestoControl.Service.ReporteGerencialService;
 import com.utp.RestoControl.Service.ReporteService;
@@ -21,13 +20,6 @@ public class ReporteController {
 
     private final ReporteService service;
     private final ReporteGerencialService gerencialService;
-
-    @GetMapping("rentabilidad")
-    public ResponseEntity<ReporteRentabilidadResponse> rentabilidad(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return ResponseEntity.ok(service.obtenerRentabilidad(desde, hasta));
-    }
 
     @GetMapping("ventas")
     public ResponseEntity<ReporteVentasResponse> ventas(
